@@ -4,52 +4,81 @@ declare(strict_types=1);
 
 namespace App\Core;
 
+/**
+ * Simple Router with support for dynamic routes and middleware
+ */
 class Router
 {
     private array $routes = [];
     private array $middlewares = [];
-    private string $groupPrefix = '';
+    private string $prefix = '';
     private array $groupMiddlewares = [];
 
-    public function get(string $path, array|callable $handler, array $middlewares = []): self
+    /**
+     * Add GET route
+     */
+    public function get(string $path, callable|array $handler, array $middlewares = []): self
     {
         return $this->addRoute('GET', $path, $handler, $middlewares);
     }
 
-    public function post(string $path, array|callable $handler, array $middlewares = []): self
+    /**
+     * Add POST route
+     */
+    public function post(string $path, callable|array $handler, array $middlewares = []): self
     {
         return $this->addRoute('POST', $path, $handler, $middlewares);
     }
 
-    public function put(string $path, array|callable $handler, array $middlewares = []): self
+    /**
+     * Add PUT route
+     */
+    public function put(string $path, callable|array $handler, array $middlewares = []): self
     {
         return $this->addRoute('PUT', $path, $handler, $middlewares);
     }
 
-    public function delete(string $path, array|callable $handler, array $middlewares = []): self
+    /**
+     * Add DELETE route
+     */
+    public function delete(string $path, callable|array $handler, array $middlewares = []): self
     {
         return $this->addRoute('DELETE', $path, $handler, $middlewares);
     }
 
+    /**
+     * Add PATCH route
+     */
+    public function patch(string $path, callable|array $handler, array $middlewares = []): self
+    {
+        return $this->addRoute('PATCH', $path, $handler, $middlewares);
+    }
+
+    /**
+     * Group routes with prefix and/or middlewares
+     */
     public function group(string $prefix, callable $callback, array $middlewares = []): self
     {
-        $previousPrefix = $this->groupPrefix;
+        $previousPrefix = $this->prefix;
         $previousMiddlewares = $this->groupMiddlewares;
 
-        $this->groupPrefix = $previousPrefix . $prefix;
+        $this->prefix = $previousPrefix . $prefix;
         $this->groupMiddlewares = array_merge($previousMiddlewares, $middlewares);
 
         $callback($this);
 
-        $this->groupPrefix = $previousPrefix;
+        $this->prefix = $previousPrefix;
         $this->groupMiddlewares = $previousMiddlewares;
 
         return $this;
     }
 
-    private function addRoute(string $method, string $path, array|callable $handler, array $middlewares): self
+    /**
+     * Add route to collection
+     */
+    private function addRoute(string $method, string $path, callable|array $handler, array $middlewares = []): self
     {
-        $fullPath = $this->groupPrefix . $path;
+        $fullPath = $this->prefix . $path;
         $allMiddlewares = array_merge($this->groupMiddlewares, $middlewares);
 
         $this->routes[] = [
@@ -63,15 +92,23 @@ class Router
         return $this;
     }
 
+    /**
+     * Build regex pattern from route path
+     */
     private function buildPattern(string $path): string
     {
         $pattern = preg_replace('/\{([a-zA-Z_]+)\}/', '(?P<$1>[^/]+)', $path);
         return '#^' . $pattern . '$#';
     }
 
-    public function dispatch(string $method, string $uri): mixed
+    /**
+     * Dispatch request to appropriate handler
+     */
+    public function dispatch(string $method, string $uri): void
     {
-        $uri = '/' . trim(parse_url($uri, PHP_URL_PATH) ?? '', '/');
+        // Remove query string
+        $uri = parse_url($uri, PHP_URL_PATH);
+        $uri = rtrim($uri, '/') ?: '/';
 
         foreach ($this->routes as $route) {
             if ($route['method'] !== $method) {
@@ -79,59 +116,54 @@ class Router
             }
 
             if (preg_match($route['pattern'], $uri, $matches)) {
+                // Extract named parameters
                 $params = array_filter($matches, 'is_string', ARRAY_FILTER_USE_KEY);
-                return $this->executeRoute($route, $params);
+
+                // Run middlewares
+                foreach ($route['middlewares'] as $middleware) {
+                    $middlewareInstance = new $middleware();
+                    $result = $middlewareInstance->handle();
+                    if ($result === false) {
+                        return;
+                    }
+                }
+
+                // Execute handler
+                $this->executeHandler($route['handler'], $params);
+                return;
             }
         }
 
-        return $this->handleNotFound();
+        // No route found - 404
+        $this->handleNotFound();
     }
 
-    private function executeRoute(array $route, array $params): mixed
+    /**
+     * Execute route handler
+     */
+    private function executeHandler(callable|array $handler, array $params): void
     {
-        $handler = $route['handler'];
-
-        // Execute middlewares
-        foreach ($route['middlewares'] as $middleware) {
-            $result = $this->executeMiddleware($middleware);
-            if ($result !== null) {
-                return $result;
-            }
-        }
-
         if (is_callable($handler)) {
-            return $handler($params);
+            call_user_func_array($handler, $params);
+        } elseif (is_array($handler)) {
+            [$class, $method] = $handler;
+            $controller = new $class();
+            call_user_func_array([$controller, $method], $params);
         }
-
-        if (is_array($handler) && count($handler) === 2) {
-            [$controllerClass, $method] = $handler;
-            $controller = new $controllerClass();
-            return $controller->$method($params);
-        }
-
-        throw new \RuntimeException('Invalid route handler');
     }
 
-    private function executeMiddleware(string $middleware): mixed
-    {
-        if (class_exists($middleware)) {
-            $instance = new $middleware();
-            if (method_exists($instance, 'handle')) {
-                return $instance->handle();
-            }
-        }
-        return null;
-    }
-
-    private function handleNotFound(): never
+    /**
+     * Handle 404 Not Found
+     */
+    private function handleNotFound(): void
     {
         http_response_code(404);
-        echo '404 Not Found';
-        exit;
-    }
-
-    public function getRoutes(): array
-    {
-        return $this->routes;
+        
+        $errorTemplate = TEMPLATES_PATH . '/errors/404.php';
+        if (file_exists($errorTemplate)) {
+            include $errorTemplate;
+        } else {
+            echo '404 Not Found';
+        }
     }
 }
