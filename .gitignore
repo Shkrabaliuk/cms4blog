@@ -7,6 +7,9 @@
 /storage/logs/*
 !/storage/logs/.gitkeep
 
+# Installation lock
+/storage/installed.lock
+
 # Dependencies
 /vendor/
 
