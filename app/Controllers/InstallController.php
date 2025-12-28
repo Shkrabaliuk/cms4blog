@@ -14,135 +14,82 @@ class InstallController extends Controller
 
     public function index(): void
     {
-        if ($this->isInstalled()) {
-            $this->redirect('/?already_installed=1');
-        }
-
-        $step = $this->inputGet('step', 'welcome');
-        
-        switch ($step) {
-            case 'requirements':
-                $this->showRequirements();
-                break;
-            case 'database':
-                $this->showDatabase();
-                break;
-            case 'install':
-                $this->processInstall();
-                break;
-            default:
-                $this->showWelcome();
-        }
-    }
-
-    private function showWelcome(): void
-    {
-        echo $this->render('install/welcome');
-    }
-
-    private function showRequirements(): void
-    {
-        $requirements = [
-            'PHP Version >= 8.0' => version_compare(PHP_VERSION, '8.0.0', '>='),
-            'PDO Extension' => extension_loaded('pdo'),
-            'PDO MySQL Driver' => extension_loaded('pdo_mysql'),
-            'JSON Extension' => extension_loaded('json'),
-            'mbstring Extension' => extension_loaded('mbstring'),
-            'Storage Directory Writable' => is_writable(STORAGE_PATH),
-            'Cache Directory Writable' => is_writable(STORAGE_PATH . '/cache'),
-            'Logs Directory Writable' => is_writable(STORAGE_PATH . '/logs'),
-        ];
-
-        $allPassed = !in_array(false, $requirements, true);
-
-        echo $this->render('install/requirements', [
-            'requirements' => $requirements,
-            'allPassed' => $allPassed,
-        ]);
-    }
-
-    private function showDatabase(): void
-    {
-        $error = null;
-        $envFile = BASE_PATH . '/.env';
-        
-        $config = [
-            'host' => getenv('DB_HOST') ?: 'localhost',
-            'port' => getenv('DB_PORT') ?: '3306',
-            'database' => getenv('DB_DATABASE') ?: 'cms4blog',
-            'username' => getenv('DB_USERNAME') ?: 'root',
-            'password' => getenv('DB_PASSWORD') ?: '',
-        ];
-
-        if ($this->isPost()) {
-            $config = [
-                'host' => $this->inputPost('db_host', 'localhost'),
-                'port' => $this->inputPost('db_port', '3306'),
-                'database' => $this->inputPost('db_database', 'cms4blog'),
-                'username' => $this->inputPost('db_username', 'root'),
-                'password' => $this->inputPost('db_password', ''),
-            ];
-
-            try {
-                // Test connection
-                Database::configure($config);
-                
-                // Try to create database
-                Database::createDatabase($config['database']);
-
-                // Save to .env
-                $this->saveEnvConfig($config);
-
-                $this->redirect('/install?step=install');
-            } catch (\Exception $e) {
-                $error = $e->getMessage();
-            }
-        }
-
-        echo $this->render('install/database', [
-            'config' => $config,
-            'error' => $error,
-        ]);
-    }
-
-    private function processInstall(): void
-    {
+        // Перевірка чи вже встановлено
         if ($this->isInstalled()) {
             $this->redirect('/');
         }
 
-        $error = null;
-        $success = false;
+        // Якщо POST - обробляємо установку
+        if ($this->isPost()) {
+            $this->processInstall();
+            return;
+        }
 
+        // Показуємо форму
+        $this->showInstallForm();
+    }
+
+    private function showInstallForm(): void
+    {
+        echo $this->render('install/simple');
+    }
+
+    private function processInstall(): void
+    {
         try {
-            // Load database config
+            // Отримуємо дані з форми
+            $server = $this->inputPost('server', 'localhost');
+            $username = $this->inputPost('username', 'root');
+            $password = $this->inputPost('password', '');
+            $database = $this->inputPost('database');
+            $adminPassword = $this->inputPost('admin_password');
+
+            // Валідація
+            if (empty($database)) {
+                $this->json(['success' => false, 'error' => 'Database name is required'], 400);
+            }
+
+            if (empty($adminPassword)) {
+                $this->json(['success' => false, 'error' => 'Admin password is required'], 400);
+            }
+
+            // Налаштовуємо підключення до БД
             $config = [
-                'host' => getenv('DB_HOST'),
-                'port' => getenv('DB_PORT'),
-                'database' => getenv('DB_DATABASE'),
-                'username' => getenv('DB_USERNAME'),
-                'password' => getenv('DB_PASSWORD'),
+                'host' => $server,
+                'port' => '3306',
+                'database' => $database,
+                'username' => $username,
+                'password' => $password,
             ];
 
             Database::configure($config);
 
-            // Run migrations
-            $migrationsPath = BASE_PATH . '/database/migrations';
-            $executedMigrations = Migration::runAll($migrationsPath);
+            // Створюємо базу даних
+            Database::createDatabase($database);
 
-            // Create lock file
+            // Виконуємо міграції
+            $migrationsPath = BASE_PATH . '/database/migrations';
+            Migration::runAll($migrationsPath);
+
+            // Оновлюємо пароль адміністратора
+            $hashedPassword = password_hash($adminPassword, PASSWORD_BCRYPT);
+            Database::execute(
+                "UPDATE users SET password = :password WHERE username = 'admin'",
+                ['password' => $hashedPassword]
+            );
+
+            // Зберігаємо конфігурацію в .env
+            $this->saveEnvConfig($config);
+
+            // Створюємо lock файл
             file_put_contents(self::LOCK_FILE, date('Y-m-d H:i:s'));
 
-            $success = true;
+            // Успіх
+            $this->json(['success' => true, 'message' => 'Installation completed successfully']);
 
         } catch (\Exception $e) {
-            $error = $e->getMessage();
+            $this->json(['success' => false, 'error' => $e->getMessage()], 500);
         }
-
-        echo $this->render('install/complete', [
-            'success' => $success,
-            'error' => $error,
-        ]);
     }
 
     private function isInstalled(): bool

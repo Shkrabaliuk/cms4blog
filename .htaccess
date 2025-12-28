@@ -3,7 +3,7 @@
 # Enable rewrite engine
 RewriteEngine On
 
-# Redirect all requests to index.php
+# Redirect all requests to index.php (except existing files)
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteRule ^ index.php [L]
@@ -19,6 +19,13 @@ RewriteRule ^ index.php [L]
     Order allow,deny
     Deny from all
 </FilesMatch>
+
+# Deny access to sensitive directories
+RedirectMatch 403 ^/\.(git|svn)(/|$)
+RedirectMatch 403 ^/storage/
+RedirectMatch 403 ^/app/
+RedirectMatch 403 ^/config/
+RedirectMatch 403 ^/database/
 
 # Security headers
 <IfModule mod_headers.c>
@@ -38,5 +45,5 @@ AddDefaultCharset UTF-8
 <IfModule mod_php.c>
     php_flag display_errors off
     php_flag log_errors on
-    php_value error_log ../storage/logs/php_error.log
+    php_value error_log ./storage/logs/php_error.log
 </IfModule>

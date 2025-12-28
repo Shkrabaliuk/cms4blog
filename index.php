@@ -26,12 +26,12 @@ if ($isProduction) {
 date_default_timezone_set('UTC');
 
 // Define base paths
-define('BASE_PATH', dirname(__DIR__));
+define('BASE_PATH', __DIR__);
 define('APP_PATH', BASE_PATH . '/app');
 define('CONFIG_PATH', BASE_PATH . '/config');
 define('STORAGE_PATH', BASE_PATH . '/storage');
 define('TEMPLATES_PATH', BASE_PATH . '/templates');
-define('PUBLIC_PATH', __DIR__);
+define('PUBLIC_PATH', BASE_PATH);
 
 // PSR-4 Autoloader
 spl_autoload_register(function (string $class): void {
