@@ -212,7 +212,25 @@
 </head>
 <body>
     <div class="container">
-        <!-- Логотип -->
+        <?php if (isset($alreadyInstalled) && $alreadyInstalled): ?>
+            <!-- Вже встановлено -->
+            <div class="logo">
+                <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="50" cy="50" r="48" fill="#FDB022" stroke="#F59E0B" stroke-width="2"/>
+                    <path d="M50 10 L50 50 L75 65 M50 50 L25 65 M50 50 L35 25 M50 50 L65 25" stroke="white" stroke-width="3" stroke-linecap="round"/>
+                    <circle cx="50" cy="50" r="6" fill="white"/>
+                </svg>
+            </div>
+            <h1>Вже встановлено!</h1>
+            <div class="success-message show">
+                <strong>✓ Система вже встановлена</strong><br>
+                CMS4Blog готова до використання!
+            </div>
+            <a href="/" style="display: inline-block; padding: 14px 32px; background: #ea580c; color: white; text-decoration: none; border-radius: 8px; font-weight: 500; margin-top: 20px;">
+                Перейти на головну
+            </a>
+        <?php else: ?>
+        <!-- Форма встановлення -->
         <div class="logo">
             <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <circle cx="50" cy="50" r="48" fill="#FDB022" stroke="#F59E0B" stroke-width="2"/>
@@ -307,7 +325,7 @@
             const formData = new FormData(form);
             
             try {
-                const response = await fetch('/install', {
+                const response = await fetch('/', {
                     method: 'POST',
                     body: formData
                 });
@@ -336,5 +354,7 @@
             }
         });
     </script>
+        <?php endif; ?>
+    </div>
 </body>
 </html>

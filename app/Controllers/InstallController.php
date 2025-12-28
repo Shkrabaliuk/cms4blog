@@ -14,24 +14,22 @@ class InstallController extends Controller
 
     public function index(): void
     {
-        // Перевірка чи вже встановлено
-        if ($this->isInstalled()) {
-            $this->redirect('/');
-        }
-
         // Якщо POST - обробляємо установку
         if ($this->isPost()) {
             $this->processInstall();
             return;
         }
 
-        // Показуємо форму
+        // Показуємо форму (навіть якщо вже встановлено - просто покаже що встановлено)
         $this->showInstallForm();
     }
 
     private function showInstallForm(): void
     {
-        echo $this->render('install/simple');
+        $alreadyInstalled = $this->isInstalled();
+        echo $this->render('install/simple', [
+            'alreadyInstalled' => $alreadyInstalled
+        ]);
     }
 
     private function processInstall(): void

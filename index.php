@@ -109,18 +109,6 @@ set_error_handler(function (int $severity, string $message, string $file, int $l
     throw new ErrorException($message, 0, $severity, $file, $line);
 });
 
-// Check if system is installed
-$installedLockFile = STORAGE_PATH . '/installed.lock';
-$isInstalled = file_exists($installedLockFile);
-$requestUri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
-$requestUri = rtrim($requestUri, '/') ?: '/';
-
-// Auto-redirect to installer if not installed
-if (!$isInstalled && $requestUri !== '/install') {
-    header('Location: /install');
-    exit;
-}
-
 // Bootstrap application
 use App\Core\Router;
 use App\Core\Container;

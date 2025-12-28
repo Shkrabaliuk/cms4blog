@@ -18,22 +18,13 @@ use App\Controllers\InstallController;
 $installedLockFile = STORAGE_PATH . '/installed.lock';
 $isInstalled = file_exists($installedLockFile);
 
-// Installation routes (always available, but redirect is in index.php)
-$router->get('/install', [InstallController::class, 'index']);
-$router->post('/install', [InstallController::class, 'index']);
-
-// Main routes (only work after installation due to redirect in index.php)
-$router->get('/', [HomeController::class, 'index']);
-$router->get('/about', [HomeController::class, 'about']);
-
-// Example: API routes group
-// $router->group('/api', function (Router $router) {
-//     $router->get('/posts', [PostController::class, 'index']);
-//     $router->get('/posts/{id}', [PostController::class, 'show']);
-//     $router->post('/posts', [PostController::class, 'store']);
-// });
-
-// Example: Admin routes with middleware
-// $router->group('/admin', function (Router $router) {
-//     $router->get('/dashboard', [AdminController::class, 'dashboard']);
-// }, ['AuthMiddleware']);
+// Main route - показує інсталятор або головну залежно від стану
+if (!$isInstalled) {
+    // Якщо не встановлено - показуємо інсталятор на головній
+    $router->get('/', [InstallController::class, 'index']);
+    $router->post('/', [InstallController::class, 'index']);
+} else {
+    // Якщо встановлено - показуємо звичайні сторінки
+    $router->get('/', [HomeController::class, 'index']);
+    $router->get('/about', [HomeController::class, 'about']);
+}
