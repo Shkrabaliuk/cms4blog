@@ -6,7 +6,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $user = $_POST['username'] ?? 'root';
     $password = $_POST['password'] ?? '';
     $database = $_POST['database'] ?? '';
-    // Пароль адміністратора поки не використовуємо в БД, але приймаємо
     
     try {
         $dsn = "mysql:host=$server;charset=utf8mb4";
@@ -14,6 +13,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $pdo->exec("CREATE DATABASE IF NOT EXISTS `$database`");
         $pdo->exec("USE `$database`");
         
+        // Створюємо таблицю постів
         $sql = "CREATE TABLE IF NOT EXISTS `posts` (
             `id` int(11) NOT NULL AUTO_INCREMENT,
             `title` varchar(255) NOT NULL,
@@ -23,6 +23,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;";
         $pdo->exec($sql);
 
+        // Створюємо файл конфігурації
         $configContent = "<?php
 define('DB_HOST', '$server');
 define('DB_NAME', '$database');
@@ -30,7 +31,7 @@ define('DB_USER', '$user');
 define('DB_PASS', '$password');
 ";
         if (file_put_contents('config.php', $configContent) === false) {
-             throw new Exception("Не вдалося створити config.php");
+             throw new Exception("Не вдалося створити файл config.php. Перевірте права доступу.");
         }
         echo json_encode(['success' => true]);
         exit;
@@ -58,46 +59,45 @@ $alreadyInstalled = file_exists('config.php');
         <?php else: ?>
             
             <h1>Встановлення</h1>
-            <p class="subtitle">Database parameters that your hosting provider has given you:</p>
+            <p class="subtitle">Параметри бази даних від вашого хостинг-провайдера:</p>
             
             <div class="error-message" id="errorMessage"></div>
-            <div class="success-message" id="successMessage">✓ Success! Redirecting...</div>
+            <div class="success-message" id="successMessage">✓ Успішно! Переходимо на сайт...</div>
             
             <form id="installForm">
                 <div class="form-group">
-                    <label>Server</label>
+                    <label>Сервер (Host)</label>
                     <input type="text" name="server" value="localhost" required>
                 </div>
                 
                 <div class="form-group">
-                    <label>User name and password</label>
+                    <label>Користувач та пароль БД</label>
                     <div class="double-input">
                         <input type="text" name="username" placeholder="root" required>
-                        <input type="password" name="password" placeholder="">
+                        <input type="password" name="password" placeholder="Пароль (якщо є)">
                     </div>
                 </div>
 
                 <div class="form-group">
-                    <label>Database name</label>
-                    <input type="text" name="database" placeholder="" required>
-                    <div class="hint">Ask your hosting provider how to create database, if necessary</div>
+                    <label>Ім'я бази даних</label>
+                    <input type="text" name="database" placeholder="my_blog" required>
+                    <div class="hint">Якщо бази немає, ми спробуємо створити її автоматично.</div>
                 </div>
                 
                 <div class="form-group" style="margin-top: 40px;">
-                    <label>Password you’d like to use to access your blog:</label>
+                    <label>Придумайте пароль для входу в адмінку:</label>
                     <input type="password" name="admin_password" required>
                 </div>
                 
-                <button type="submit" id="submitBtn">Start blogging</button>
+                <button type="submit" id="submitBtn">Почати блог</button>
                 <span class="keyboard-hint">Ctrl + Enter</span>
             </form>
             
-            <div class="loading" id="loading">Connecting...</div>
+            <div class="loading" id="loading">Налаштування...</div>
         <?php endif; ?>
     </div>
 
     <script>
-        // Той самий JS, що й раніше
         const form = document.getElementById('installForm');
         if(form) {
             const submitBtn = document.getElementById('submitBtn');
@@ -126,7 +126,7 @@ $alreadyInstalled = file_exists('config.php');
                     loading.classList.remove('show');
                     if (result.success) {
                         successMessage.classList.add('show');
-                        setTimeout(() => window.location.reload(), 1000);
+                        setTimeout(() => window.location.reload(), 1500);
                     } else {
                         submitBtn.disabled = false;
                         errorMessage.textContent = result.error;
@@ -135,7 +135,7 @@ $alreadyInstalled = file_exists('config.php');
                 } catch (error) {
                     loading.classList.remove('show');
                     submitBtn.disabled = false;
-                    errorMessage.textContent = 'Connection error';
+                    errorMessage.textContent = 'Помилка з\'єднання';
                     errorMessage.classList.add('show');
                 }
             });
