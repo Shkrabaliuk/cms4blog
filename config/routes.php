@@ -18,21 +18,13 @@ use App\Controllers\InstallController;
 $installedLockFile = STORAGE_PATH . '/installed.lock';
 $isInstalled = file_exists($installedLockFile);
 
-// Installation routes (only if not installed)
-if (!$isInstalled) {
-    $router->get('/install', [InstallController::class, 'index']);
-    $router->post('/install', [InstallController::class, 'index']);
-}
+// Installation routes (always available, but redirect is in index.php)
+$router->get('/install', [InstallController::class, 'index']);
+$router->post('/install', [InstallController::class, 'index']);
 
-// Main routes
+// Main routes (only work after installation due to redirect in index.php)
 $router->get('/', [HomeController::class, 'index']);
 $router->get('/about', [HomeController::class, 'about']);
-
-// Redirect to install if not installed and accessing any other route
-if (!$isInstalled && $_SERVER['REQUEST_URI'] !== '/install') {
-    header('Location: /install');
-    exit;
-}
 
 // Example: API routes group
 // $router->group('/api', function (Router $router) {
