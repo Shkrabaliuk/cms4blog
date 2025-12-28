@@ -14,13 +14,9 @@ define('APP_START', microtime(true));
 // Error reporting based on environment
 $isProduction = getenv('APP_ENV') === 'production';
 
-if ($isProduction) {
-    error_reporting(0);
-    ini_set('display_errors', '0');
-} else {
-    error_reporting(E_ALL);
-    ini_set('display_errors', '1');
-}
+// Always display errors for debugging
+error_reporting(E_ALL);
+ini_set('display_errors', '1');
 
 // Set default timezone
 date_default_timezone_set('UTC');
