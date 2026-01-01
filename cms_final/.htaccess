@@ -1,0 +1,14 @@
+# UTF-8
+AddDefaultCharset UTF-8
+
+# Захист конфігу
+<Files "config.php">
+    Order Allow,Deny
+    Deny from all
+</Files>
+
+# Захист від перегляду директорій
+Options -Indexes
+
+# 404
+ErrorDocument 404 /404.php
