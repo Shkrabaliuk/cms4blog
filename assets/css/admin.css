@@ -1,0 +1,440 @@
+/* Адмін-панель: загальні стилі */
+
+/* Повідомлення */
+.success { 
+  background: #e8f5e9; 
+  color: #2e7d32; 
+  padding: 12px; 
+  border-radius: 6px; 
+  margin-bottom: 20px; 
+}
+
+.error { 
+  background: #ffebee; 
+  color: #c62828; 
+  padding: 12px; 
+  border-radius: 6px; 
+  margin-bottom: 20px; 
+}
+
+.error-message { 
+  background: #ffebee; 
+  color: #c62828; 
+  padding: 12px; 
+  border-radius: 6px; 
+  margin-bottom: 16px; 
+}
+
+/* Налаштування - аватар */
+.avatar-preview { 
+  width: 80px; 
+  height: 80px; 
+  border-radius: 50%; 
+  object-fit: cover; 
+  background: var(--inputBackgroundColor); 
+  margin-bottom: 12px; 
+}
+
+/* Пости - таблиця */
+.posts-table { 
+  width: 100%; 
+  border-collapse: collapse; 
+  margin: 20px 0; 
+}
+
+.posts-table th, 
+.posts-table td { 
+  padding: 12px; 
+  text-align: left; 
+  border-bottom: 1px solid var(--thinRuleColor); 
+}
+
+.posts-table th { 
+  font-weight: 600; 
+}
+
+.posts-table tr:hover { 
+  background: var(--inputBackgroundColor); 
+}
+
+.post-actions { 
+  display: flex; 
+  gap: 8px; 
+}
+
+.post-actions a { 
+  font-size: 14px; 
+}
+
+.btn-delete { 
+  color: #c62828; 
+}
+
+.search-form { 
+  margin-bottom: 20px; 
+}
+
+/* Редактор постів */
+textarea { 
+  min-height: 300px; 
+}
+
+/* Модерація коментарів */
+.tabs { 
+  display: flex; 
+  gap: 12px; 
+  margin: 20px 0; 
+  border-bottom: 1px solid var(--thinRuleColor); 
+  padding-bottom: 8px; 
+}
+
+.tabs a { 
+  text-decoration: none; 
+  padding: 8px 16px; 
+  border-radius: 6px 6px 0 0; 
+  color: var(--textColor); 
+}
+
+.tabs a.active { 
+  background: var(--inputBackgroundColor); 
+  font-weight: 600; 
+}
+
+.tabs a:hover { 
+  background: var(--inputBackgroundColor); 
+}
+
+.comment-item { 
+  padding: 20px; 
+  border: 1px solid var(--thinRuleColor); 
+  border-radius: 6px; 
+  margin-bottom: 16px; 
+}
+
+.comment-header { 
+  display: flex; 
+  justify-content: space-between; 
+  align-items: center; 
+  margin-bottom: 12px; 
+}
+
+.comment-author { 
+  font-weight: 600; 
+}
+
+.comment-meta { 
+  color: var(--secondaryTextColor); 
+  font-size: 14px; 
+}
+
+.comment-content { 
+  margin: 12px 0; 
+  line-height: 1.6; 
+}
+
+.comment-post { 
+  margin-bottom: 8px; 
+  font-size: 14px; 
+  color: var(--secondaryTextColor); 
+}
+
+.comment-actions { 
+  display: flex; 
+  gap: 8px; 
+}
+
+.comment-actions button { 
+  font-size: 14px; 
+  cursor: pointer; 
+}
+
+.btn-approve { 
+  background: #4caf50; 
+  color: white; 
+  border: none; 
+  padding: 6px 12px; 
+  border-radius: 4px; 
+}
+
+.btn-reject { 
+  background: #ff9800; 
+  color: white; 
+  border: none; 
+  padding: 6px 12px; 
+  border-radius: 4px; 
+}
+
+.btn-delete { 
+  background: #f44336; 
+  color: white; 
+  border: none; 
+  padding: 6px 12px; 
+  border-radius: 4px; 
+}
+
+.badge-pending { 
+  background: #ff9800; 
+  color: white; 
+  padding: 2px 8px; 
+  border-radius: 4px; 
+  font-size: 12px; 
+}
+
+.badge-approved { 
+  background: #4caf50; 
+  color: white; 
+  padding: 2px 8px; 
+  border-radius: 4px; 
+  font-size: 12px; 
+}
+
+.badge-rejected { 
+  background: #f44336; 
+  color: white; 
+  padding: 2px 8px; 
+  border-radius: 4px; 
+  font-size: 12px; 
+}
+
+/* Сторінка логіну */
+.login-wrapper { 
+  display: flex; 
+  align-items: center; 
+  justify-content: center; 
+  min-height: 100vh; 
+}
+
+.login-form { 
+  max-width: 400px; 
+  width: 100%; 
+  padding: 40px; 
+}
+
+.login-form h1 { 
+  margin-bottom: 24px; 
+  text-align: center; 
+}
+
+.login-form input { 
+  width: 100%; 
+  margin-bottom: 16px; 
+}
+
+.login-form .e2-submit-button { 
+  width: 100%; 
+}
+
+/* Сторінка встановлення */
+.install-container { 
+  max-width: 500px; 
+  margin: 80px auto; 
+  padding: 40px; 
+}
+
+.install-icon { 
+  text-align: center; 
+  margin-bottom: 32px; 
+}
+
+.install-icon svg { 
+  width: 80px; 
+  height: 80px; 
+}
+
+.install-container h1 { 
+  text-align: center; 
+  margin-bottom: 32px; 
+}
+
+.install-section { 
+  margin-bottom: 32px; 
+}
+
+.install-section h2 { 
+  font-size: 14px; 
+  color: var(--foregroundColor); 
+  opacity: 0.6; 
+  margin-bottom: 16px; 
+}
+
+.form-group { 
+  margin-bottom: 20px; 
+}
+
+.form-group label { 
+  display: block; 
+  font-size: 14px; 
+  font-weight: 500; 
+  margin-bottom: 8px; 
+}
+
+.form-group input, 
+.form-group select { 
+  width: 100%; 
+}
+
+.form-hint { 
+  font-size: 13px; 
+  color: var(--foregroundColor); 
+  opacity: 0.6; 
+  margin-top: 4px; 
+}
+
+.install-button { 
+  width: 100%; 
+}
+
+.database-list { 
+  list-style: none; 
+  padding: 0; 
+  margin: 16px 0; 
+}
+
+.database-list li { 
+  padding: 8px 12px; 
+  background: var(--inputBackgroundColor); 
+  margin-bottom: 4px; 
+  border-radius: 4px; 
+  font-family: monospace; 
+}
+
+.success-message { 
+  background: #e8f5e9; 
+  color: #2e7d32; 
+  padding: 12px; 
+  border-radius: 6px; 
+  margin-bottom: 20px; 
+}
+
+.success-links { 
+  margin-top: 20px; 
+  text-align: center; 
+}
+
+.success-links a { 
+  margin: 0 8px; 
+}
+
+/* Додаткові утилітарні класи */
+.mb-20 { margin-bottom: 20px; }
+.ml-8 { margin-left: 8px; }
+.ml-16 { margin-left: 16px; }
+.mt-20 { margin-top: 20px; }
+.text-center { text-align: center; }
+.inline-form { display: inline; }
+
+/* Повідомлення модерації */
+.moderation-notice {
+  background: #fff3cd;
+  color: #856404;
+  padding: 12px;
+  border-radius: 6px;
+  margin-bottom: 20px;
+}
+
+/* Пошук постів */
+.search-input {
+  width: 300px;
+  margin-right: 8px;
+}
+
+/* Pagination spacing */
+.e2-pages.mt-20 {
+  margin-top: 20px;
+}
+
+.e2-pages span {
+  margin: 0 16px;
+}
+
+/* 404 сторінка */
+.error-404 {
+  padding: 100px 20px;
+}
+
+.error-404 h1 {
+  font-size: 72px;
+  margin-bottom: 16px;
+}
+
+/* Теги хмара */
+.tags-cloud {
+  margin: 30px 0;
+  line-height: 2.5;
+}
+
+.tag-link {
+  margin-right: 15px;
+  text-decoration: none;
+  color: var(--textColor);
+}
+
+.tags-description {
+  margin-top: 40px;
+  color: var(--secondaryTextColor);
+}
+
+.tags-back-link {
+  margin-bottom: 30px;
+}
+
+.post-tags {
+  margin-left: 16px;
+}
+
+.post-tag {
+  margin-right: 8px;
+}
+
+/* Checkbox switch */
+.e2-switch {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  user-select: none;
+}
+
+.e2-switch input[type="checkbox"] {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.e2-switch i {
+  position: relative;
+  display: inline-block;
+  width: 40px;
+  height: 20px;
+  background: #ccc;
+  border-radius: 20px;
+  margin-right: 10px;
+  transition: background 0.3s;
+}
+
+.e2-switch i::after {
+  content: '';
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: white;
+  top: 2px;
+  left: 2px;
+  transition: left 0.3s;
+}
+
+.e2-switch input[type="checkbox"]:checked + i {
+  background: #4caf50;
+}
+
+.e2-switch input[type="checkbox"]:checked + i::after {
+  left: 22px;
+}
+
+/* Підписи форм */
+.form-control-sublabel {
+  font-size: 14px;
+  color: var(--secondaryTextColor);
+  margin-top: 6px;
+}
