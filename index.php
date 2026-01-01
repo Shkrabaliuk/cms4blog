@@ -1,6 +1,7 @@
 <?php
 // index.php - Front Controller
 
+require_once 'config/autoload.php';
 require_once 'config/db.php';
 
 // Отримання URL
