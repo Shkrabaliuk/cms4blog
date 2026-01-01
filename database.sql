@@ -1,23 +1,30 @@
 -- =============================================
--- /\\OGOS SIMPLE & STABLE
--- Тільки база: 2 пости, стабільна галерея
+-- LOGOS CMS: CLEAN CONTENT ONLY
+-- Save as: logos_clean.sql
 -- =============================================
 
 SET NAMES utf8mb4;
 SET FOREIGN_KEY_CHECKS = 0;
 
--- 1. ЧИСТА СТРУКТУРА
--- ---------------------------------------------
 CREATE DATABASE IF NOT EXISTS `logos_db` DEFAULT CHARACTER SET utf8mb4;
 USE `logos_db`;
 
+-- Видаляємо все старе
 DROP TABLE IF EXISTS `post_tags`;
 DROP TABLE IF EXISTS `tags`;
 DROP TABLE IF EXISTS `comments`;
 DROP TABLE IF EXISTS `posts`;
 DROP TABLE IF EXISTS `settings`;
+-- Видаляємо таблиці Rose, щоб бібліотека створила їх сама
+DROP TABLE IF EXISTS `rose_toc`;
+DROP TABLE IF EXISTS `rose_content`;
+DROP TABLE IF EXISTS `rose_fulltext_index`;
+DROP TABLE IF EXISTS `rose_keyword_index`;
+DROP TABLE IF EXISTS `rose_metadata`;
+DROP TABLE IF EXISTS `rose_snippet`;
+DROP TABLE IF EXISTS `rose_word`;
 
--- Таблиці
+-- 1. СТРУКТУРА КОНТЕНТУ
 CREATE TABLE `settings` (
   `key` varchar(50) NOT NULL,
   `value` text,
@@ -51,62 +58,8 @@ CREATE TABLE `comments` (
   KEY `post_id` (`post_id`)
 ) ENGINE=InnoDB;
 
-CREATE TABLE `tags` (
-  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
-  `name` varchar(50) NOT NULL,
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB;
-
-CREATE TABLE `post_tags` (
-  `post_id` int(11) unsigned NOT NULL,
-  `tag_id` int(11) unsigned NOT NULL,
-  PRIMARY KEY (`post_id`,`tag_id`)
-) ENGINE=InnoDB;
-
-
--- 2. КОНТЕНТ (СТАБІЛЬНИЙ)
--- ---------------------------------------------
-
--- POST 1: Текст (Typography Test)
-INSERT INTO `posts` (`id`, `slug`, `title`, `content`, `type`, `created_at`) VALUES
-(1, 'typography-basics', 'Типографіка та текст',
-'<p>Це перевірка шрифтів. Текст має читатися легко.</p>
-<blockquote>Простота — це не відсутність елементів, а відсутність зайвого.</blockquote>
-<ul>
-  <li>Пункт списку 1</li>
-  <li>Пункт списку 2</li>
-</ul>
-<pre><code class="language-php">echo "Hello World";</code></pre>',
-'text', '2024-01-01 10:00:00');
-
--- POST 2: Галерея (Fixed Height)
--- Використовуємо data-height, щоб зафіксувати висоту і прибрати "миготіння"
-INSERT INTO `posts` (`id`, `slug`, `title`, `content`, `type`, `created_at`) VALUES
-(2, 'stable-gallery', 'Стабільна галерея',
-'<p>Ця галерея має жорстко задану пропорцію 16:9, тому вона не повинна стрибати при завантаженні.</p>
-
-<div class="fotorama" 
-     data-width="100%" 
-     data-ratio="16/9" 
-     data-allowfullscreen="true" 
-     data-nav="thumbs">
-     
-  <img src="https://images.unsplash.com/photo-1494526585095-c41746248156?ixlib=rb-1.2.1&w=1200&q=80" data-caption="Архітектура 1">
-  <img src="https://images.unsplash.com/photo-1486718448742-163732cd1544?ixlib=rb-1.2.1&w=1200&q=80" data-caption="Архітектура 2">
-  <img src="https://images.unsplash.com/photo-1485627941502-d2e6429fa8af?ixlib=rb-1.2.1&w=1200&q=80" data-caption="Велосипед">
-  
-</div>',
-'image', '2024-01-02 12:00:00');
-
-
--- 3. ТЕГИ ТА КОМЕНТАРІ
--- ---------------------------------------------
-INSERT INTO `tags` (`id`, `name`) VALUES (1, 'test'), (2, 'gallery');
-
-INSERT INTO `post_tags` (`post_id`, `tag_id`) VALUES (1, 1), (2, 1), (2, 2);
-
-INSERT INTO `comments` (`id`, `post_id`, `parent_id`, `author_name`, `content`) VALUES
-(1, 2, NULL, 'User', 'Тепер працює стабільно?'),
-(2, 2, 1, 'Admin', 'Так, фіксована пропорція допомагає.');
+-- 2. ТЕСТОВИЙ ПОСТ
+INSERT INTO `posts` (`title`, `slug`, `content`, `type`) VALUES
+('Hello World', 'hello-world', '<p>Привіт, це тестовий пост.</p>', 'text');
 
 SET FOREIGN_KEY_CHECKS = 1;

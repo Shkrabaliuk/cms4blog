@@ -1,30 +1,72 @@
 <?php
-/**
- * Simple PSR-4 Autoloader для Rose та Neasden
- */
+// install_search.php
 
-spl_autoload_register(function ($class) {
-    $namespaces = [
-        'S2\\Rose\\' => __DIR__ . '/../assets/libs/rose/',
-        'Neasden\\' => __DIR__ . '/../assets/libs/neasden/',
-    ];
-    
-    foreach ($namespaces as $prefix => $base_dir) {
-        $len = strlen($prefix);
-        
-        // Перевіряємо чи клас належить цьому namespace
-        if (strncmp($prefix, $class, $len) === 0) {
-            // Отримуємо відносний шлях класу
-            $relative_class = substr($class, $len);
-            
-            // Замінюємо namespace separators на directory separators
-            $file = $base_dir . str_replace('\\', '/', $relative_class) . '.php';
-            
-            // Якщо файл існує, підключаємо
-            if (file_exists($file)) {
-                require $file;
-                return;
-            }
-        }
+// =========================================================
+// 1. ПІДКЛЮЧЕННЯ АВТОЗАВАНТАЖУВАЧА
+// =========================================================
+
+// Використовуємо шлях, який ви вказали: config/autoload.php
+$loaderPath = __DIR__ . '/config/autoload.php';
+
+if (!file_exists($loaderPath)) {
+    die("❌ Помилка: Не можу знайти файл автозавантаження за шляхом: <b>$loaderPath</b><br>Перевірте, чи існує папка config і файл autoload.php у ній.");
+}
+
+require_once $loaderPath;
+
+use S2\Rose\Storage\Database\PdoStorage;
+use S2\Rose\Storage\Database\MysqlRepository;
+
+// =========================================================
+// 2. НАЛАШТУВАННЯ БАЗИ ДАНИХ
+// =========================================================
+
+$host = '127.0.0.1';
+$db   = 'logos_db';
+$user = 'root';     // <-- ВАШ ЛОГІН (зазвичай root)
+$pass = '';         // <-- ВАШ ПАРОЛЬ (якщо є)
+$charset = 'utf8mb4';
+
+$dsn = "mysql:host=$host;dbname=$db;charset=$charset";
+$opt = [
+    PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
+    PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+    PDO::ATTR_EMULATE_PREPARES   => false,
+];
+
+try {
+    // Підключення до MySQL
+    $pdo = new PDO($dsn, $user, $pass, $opt);
+    echo "✅ Підключення до бази даних успішне.<br>";
+
+    // =========================================================
+    // 3. ІНІЦІАЛІЗАЦІЯ ПОШУКОВОГО ДВИГУНА (ROSE)
+    // =========================================================
+
+    // Перевіряємо, чи спрацював автозавантажувач
+    if (!class_exists('S2\Rose\Storage\Database\PdoStorage')) {
+        throw new Exception("Клас PdoStorage не знайдено. Перевірте, чи лежать файли бібліотеки в папці <code>assets/libs/rose/</code>");
     }
-});
+
+    // Створюємо об'єкт сховища з префіксом таблиць 'rose_'
+    $storage = new PdoStorage($pdo, 'rose_');
+    $repository = new MysqlRepository($storage);
+
+    // =========================================================
+    // 4. МАГІЯ: СТВОРЕННЯ ТАБЛИЦЬ
+    // =========================================================
+    
+    echo "⏳ Виконую команду erase() для створення структури таблиць...<br>";
+    
+    // Ця команда видаляє криві таблиці і створює правильні
+    $repository->erase();
+    
+    echo "<h2 style='color:green'>🎉 Успіх!</h2>";
+    echo "Таблиці для пошуку створені. Помилка <i>'Call S2\Rose... erase() first'</i> має зникнути.<br>";
+    echo "Тепер видаліть цей файл (install_search.php) і оновіть головну сторінку.";
+
+} catch (\PDOException $e) {
+    die("<h3 style='color:red'>❌ Помилка бази даних:</h3>" . $e->getMessage());
+} catch (\Exception $e) {
+    die("<h3 style='color:red'>❌ Помилка:</h3>" . $e->getMessage());
+}
