@@ -52,6 +52,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 PRIMARY KEY (`key`)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;");
 
+            // Таблиця коментарів
+            $pdo->exec("CREATE TABLE IF NOT EXISTS `comments` (
+                `id` int(11) NOT NULL AUTO_INCREMENT,
+                `post_id` int(11) NOT NULL,
+                `author` varchar(100) NOT NULL,
+                `content` text NOT NULL,
+                `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                PRIMARY KEY (`id`),
+                KEY `post_id` (`post_id`)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;");
+
             // Створення користувача
             $hash = password_hash($blog_password, PASSWORD_DEFAULT);
             $stmt = $pdo->prepare("INSERT INTO users (password) VALUES (?)");

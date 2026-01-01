@@ -135,3 +135,49 @@ function format_tags($tags_array) {
     if (empty($tags_array)) return '';
     return implode(', ', $tags_array);
 }
+
+/**
+ * Генерує title сторінки
+ */
+function generate_page_title($pageTitle = '', $blog_name = '') {
+    $blog_name = $blog_name ?: get_setting('blog_name', 'Мій Блог');
+    
+    // Головна сторінка
+    if (empty($pageTitle)) {
+        $subtitle = get_setting('blog_subtitle', '');
+        return $subtitle ? "$blog_name — $subtitle" : $blog_name;
+    }
+    
+    // Пошук
+    if (strpos($pageTitle, 'Пошук: ') === 0) {
+        $query = trim(str_replace('Пошук:', '', $pageTitle));
+        return "«$query» — Пошук — $blog_name";
+    }
+    
+    // 404
+    if (strpos($pageTitle, '404') === 0) {
+        return "Сторінку не знайдено — $blog_name";
+    }
+    
+    // Звичайна сторінка (пост)
+    return "$pageTitle — $blog_name";
+}
+
+/**
+ * Отримати коментарі до поста
+ */
+function get_comments($post_id) {
+    global $pdo;
+    $stmt = $pdo->prepare("SELECT id, post_id, author, content, created_at FROM comments WHERE post_id = ? ORDER BY created_at ASC");
+    $stmt->execute([$post_id]);
+    return $stmt->fetchAll();
+}
+
+/**
+ * Додати коментар
+ */
+function add_comment($post_id, $author, $content) {
+    global $pdo;
+    $stmt = $pdo->prepare("INSERT INTO comments (post_id, author, content) VALUES (?, ?, ?)");
+    return $stmt->execute([$post_id, $author, $content]);
+}

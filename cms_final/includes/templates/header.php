@@ -10,7 +10,7 @@ $avatar = get_setting('avatar', '');
 <html lang="uk">
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-<title><?= isset($pageTitle) ? htmlspecialchars($pageTitle) . ' — ' : '' ?><?= htmlspecialchars($blog_name) ?></title>
+<title><?= htmlspecialchars(generate_page_title($pageTitle ?? '', $blog_name)) ?></title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="stylesheet" type="text/css" href="/assets/css/style.css" />
 </head>

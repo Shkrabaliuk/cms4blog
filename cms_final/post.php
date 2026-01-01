@@ -61,6 +61,51 @@ require 'includes/templates/header.php';
   <a href="/index.php">← Назад до всіх постів</a>
 </div>
 
+<!-- Коментарі -->
+<div class="comments-section" style="margin-top: 60px; max-width: 720px;">
+  <h2 style="font-size: 24px; margin-bottom: 30px;">Коментарі</h2>
+  
+  <?php
+  $comments = get_comments($post['id']);
+  if (!empty($comments)):
+  ?>
+    <div class="comments-list">
+      <?php foreach ($comments as $comment): ?>
+        <div class="comment" style="margin-bottom: 30px; padding-bottom: 30px; border-bottom: 1px solid var(--thinRuleColor);">
+          <div style="font-weight: bold; margin-bottom: 8px;">
+            <?= htmlspecialchars($comment['author']) ?>
+          </div>
+          <div style="font-size: 13px; opacity: 0.6; margin-bottom: 12px;">
+            <?= time_ago($comment['created_at']) ?>
+          </div>
+          <div style="line-height: 24px;">
+            <?= nl2br(htmlspecialchars($comment['content'])) ?>
+          </div>
+        </div>
+      <?php endforeach; ?>
+    </div>
+  <?php else: ?>
+    <p style="opacity: 0.6; margin-bottom: 30px;">Поки що коментарів немає. Будьте першим!</p>
+  <?php endif; ?>
+  
+  <h3 style="font-size: 20px; margin: 40px 0 20px;">Додати коментар</h3>
+  <form action="/add-comment.php" method="POST" class="comment-form">
+    <input type="hidden" name="post_id" value="<?= $post['id'] ?>">
+    
+    <div style="margin-bottom: 16px;">
+      <label style="display: block; margin-bottom: 8px; font-weight: 500;">Ім'я:</label>
+      <input type="text" name="author" required style="width: 100%; padding: 10px; border: 1px solid var(--thinRuleColor); border-radius: 6px; font-family: inherit; font-size: 16px;">
+    </div>
+    
+    <div style="margin-bottom: 16px;">
+      <label style="display: block; margin-bottom: 8px; font-weight: 500;">Коментар:</label>
+      <textarea name="content" required rows="5" style="width: 100%; padding: 10px; border: 1px solid var(--thinRuleColor); border-radius: 6px; font-family: inherit; font-size: 16px; resize: vertical;"></textarea>
+    </div>
+    
+    <button type="submit" class="e2-button">Відправити коментар</button>
+  </form>
+</div>
+
 </div>
 
 <?php require 'includes/templates/footer.php'; ?>
