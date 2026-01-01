@@ -1,9 +1,9 @@
 <?php
 // config/db.php
 $host = 'localhost';
-$db   = 'logos_db'; // Твоя назва БД
-$user = 'root';     // Твій юзер
-$pass = '';         // Твій пароль
+$db   = 'logos_db';
+$user = 'root';
+$pass = '5sk1#AAD1#b1bkk';
 $charset = 'utf8mb4';
 
 $dsn = "mysql:host=$host;dbname=$db;charset=$charset";
