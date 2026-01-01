@@ -89,7 +89,7 @@ require 'includes/templates/header.php';
   <?php endif; ?>
   
   <h3 style="font-size: 20px; margin: 40px 0 20px;">Додати коментар</h3>
-  <form action="/admin/add-comment.php" method="POST" class="comment-form">
+  <form action="/add-comment.php" method="POST" class="comment-form">
     <input type="hidden" name="post_id" value="<?= $post['id'] ?>">
     
     <div style="margin-bottom: 16px;">

@@ -1,11 +1,18 @@
 <?php
-require_once '../includes/db.php';
-require_once '../includes/functions.php';
+require_once 'includes/db.php';
+require_once 'includes/functions.php';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $post_id = intval($_POST['post_id']);
     $author = trim($_POST['author']);
     $content = trim($_POST['content']);
+    
+    // Validate that post exists
+    $post = get_post($post_id);
+    if (!$post) {
+        header("Location: /404.php");
+        exit;
+    }
     
     // Validate input
     if ($post_id && $author && $content) {
