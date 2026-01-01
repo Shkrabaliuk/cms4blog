@@ -1,19 +1,10 @@
 <?php
-session_start();
-
-if (!file_exists('config.php')) {
-    header("Location: install/install.php");
-    exit;
-}
-
-require 'includes/db.php';
-require 'includes/functions.php';
+require_once 'includes/db.php';
+require_once 'includes/functions.php';
 
 $selected_tag = $_GET['tag'] ?? '';
 $page = max(1, intval($_GET['page'] ?? 1));
 
-$blog_name = get_setting('blog_name', 'Мій Блог');
-$blog_subtitle = get_setting('blog_subtitle', 'Простий блог на PHP');
 $posts_per_page = intval(get_setting('posts_per_page', 10));
 
 // Отримати всі унікальні теги
@@ -31,10 +22,8 @@ foreach ($all_tags_raw as $tags_string) {
     }
 }
 
-// Сортування тегів за кількістю постів
 arsort($tags_count);
 
-// Пости з вибраним тегом
 $posts = [];
 $total = 0;
 if ($selected_tag) {
@@ -42,7 +31,6 @@ if ($selected_tag) {
     $stmt->execute(["%$selected_tag%"]);
     $all_posts = $stmt->fetchAll();
     
-    // Фільтруємо точні збіги тегів
     $filtered_posts = [];
     foreach ($all_posts as $post) {
         $post_tags = parse_tags($post['tags']);
@@ -58,80 +46,59 @@ if ($selected_tag) {
 
 $total_pages = $selected_tag ? ceil($total / $posts_per_page) : 0;
 
+$pageTitle = $selected_tag ? "Тег: $selected_tag" : "Теги";
 require 'includes/templates/header.php';
 ?>
 
-<div class="e2-heading">
-  <h2><?= $selected_tag ? 'Пости з тегом: ' . htmlspecialchars($selected_tag) : 'Всі теги' ?></h2>
-</div>
+<h2><?= $selected_tag ? 'Пости з тегом: ' . htmlspecialchars($selected_tag) : 'Всі теги' ?></h2>
 
 <?php if (!$selected_tag): ?>
-  <!-- Хмара тегів -->
-  <div class="tags-cloud">
-    <?php foreach ($tags_count as $tag => $count): 
-      $size = min(24, 14 + ($count * 2));
-    ?>
-      <a href="?tag=<?= urlencode($tag) ?>" 
-         class="tag-link"
-         style="font-size: <?= $size ?>px;"
-         title="<?= $count ?> <?= $count == 1 ? 'пост' : 'постів' ?>">
-        #<?= htmlspecialchars($tag) ?>
-      </a>
-    <?php endforeach; ?>
-  </div>
-
-  <p class="tags-description">
-    Оберіть тег, щоб переглянути всі пости з цим тегом.
-  </p>
-
+    <div style="margin: 30px 0;">
+        <?php foreach ($tags_count as $tag => $count): ?>
+            <a href="?tag=<?= urlencode($tag) ?>" style="margin-right: 15px; font-size: <?= min(24, 14 + ($count * 2)) ?>px;">
+                #<?= htmlspecialchars($tag) ?>
+            </a>
+        <?php endforeach; ?>
+    </div>
+    
+    <p style="color: #999; margin-top: 40px;">Оберіть тег, щоб переглянути пости</p>
 <?php else: ?>
-  <!-- Пости з вибраним тегом -->
-  <p class="tags-back-link">
-    <a href="tags.php">← Повернутися до всіх тегів</a>
-  </p>
+    <p style="margin: 20px 0;"><a href="/tags.php">← Повернутися до всіх тегів</a></p>
 
-  <?php if (count($posts) > 0): ?>
-    <?php foreach ($posts as $post): ?>
-      <article class="e2-entry">
-        <header class="e2-entry-header">
-          <h3 class="e2-entry-title">
-            <a href="post.php?id=<?= $post['id'] ?>"><?= htmlspecialchars($post['title']) ?></a>
-          </h3>
-          <div class="e2-entry-published">
-            <time class="published" datetime="<?= $post['created_at'] ?>">
-              <?= format_date($post['created_at']) ?>
-            </time>
-            <?php if ($post['tags']): ?>
-              <span class="post-tags">
-                <?php foreach (parse_tags($post['tags']) as $tag): ?>
-                  <a href="?tag=<?= urlencode($tag) ?>" class="post-tag">#<?= htmlspecialchars($tag) ?></a>
-                <?php endforeach; ?>
-              </span>
+    <?php if (count($posts) > 0): ?>
+        <?php foreach ($posts as $post): ?>
+        <article class="post">
+            <h2><a href="/post.php?id=<?= $post['id'] ?>"><?= htmlspecialchars($post['title']) ?></a></h2>
+            <div class="post-meta">
+                <i class="fa-regular fa-clock"></i> <?= time_ago($post['created_at']) ?>
+                <?php if (!empty($post['tags'])): ?>
+                    <?php foreach (parse_tags($post['tags']) as $tag): ?>
+                        · <a href="?tag=<?= urlencode($tag) ?>"><i class="fa-solid fa-tag"></i> <?= htmlspecialchars($tag) ?></a>
+                    <?php endforeach; ?>
+                <?php endif; ?>
+            </div>
+            <div class="post-content">
+                <?= markdown_excerpt($post['content'], 300) ?>
+            </div>
+        </article>
+        <?php endforeach; ?>
+
+        <?php if ($total_pages > 1): ?>
+        <div class="pagination">
+            <?php if ($page > 1): ?>
+                <a href="?tag=<?= urlencode($selected_tag) ?>&page=<?= $page - 1 ?>"><i class="fa-solid fa-chevron-left"></i> Попередня</a>
             <?php endif; ?>
-          </div>
-        </header>
-        <div class="e2-entry-content">
-          <?= markdown_excerpt($post['content']) ?>
+            <span>Сторінка <?= $page ?> з <?= $total_pages ?></span>
+            <?php if ($page < $total_pages): ?>
+                <a href="?tag=<?= urlencode($selected_tag) ?>&page=<?= $page + 1 ?>">Наступна <i class="fa-solid fa-chevron-right"></i></a>
+            <?php endif; ?>
         </div>
-      </article>
-    <?php endforeach; ?>
-
-    <?php if ($total_pages > 1): ?>
-      <div class="e2-pages">
-        <?php if ($page > 1): ?>
-          <a href="?tag=<?= urlencode($selected_tag) ?>&page=<?= $page - 1 ?>">← Попередня</a>
         <?php endif; ?>
-        
-        <?php if ($page < $total_pages): ?>
-          <a href="?tag=<?= urlencode($selected_tag) ?>&page=<?= $page + 1 ?>">Наступна →</a>
-        <?php endif; ?>
-      </div>
+    <?php else: ?>
+        <div class="empty-state">
+            <p>Постів з цим тегом не знайдено</p>
+        </div>
     <?php endif; ?>
-
-  <?php else: ?>
-    <p>Постів з цим тегом не знайдено.</p>
-  <?php endif; ?>
-
 <?php endif; ?>
 
 <?php require 'includes/templates/footer.php'; ?>

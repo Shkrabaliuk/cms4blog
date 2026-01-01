@@ -1,966 +1,324 @@
-/* Global Styles - Aegea Theme */
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
+/* ==========================
+   /\OGOS - МІНІМАЛІСТИЧНИЙ СТИЛЬ
+   Інспірований Aegea by Ilya Birman
+   ========================== */
+
+/* RESET */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html {
+    font-size: 18px;
+    line-height: 1.6;
 }
 
 body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    line-height: 1.6;
-    color: #333;
-    background-color: #f4f4f4;
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-}
-
-/* Common Container */
-.common {
-    max-width: 1200px;
-    margin: 0 auto;
+    font-family: 'Tilda Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    color: #222;
     background: #fff;
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    width: 100%;
-}
-
-/* Content Area */
-.content {
-    flex: 1;
-    padding: 30px 40px;
-}
-
-/* Container */
-.container {
     max-width: 1200px;
     margin: 0 auto;
-    padding: 0 20px;
-    flex: 1;
+    padding: 40px 60px;
 }
 
-/* Header Styles */
+@media (max-width: 768px) {
+    body { padding: 20px; font-size: 16px; }
+}
+
+/* ТИПОГРАФІКА */
+h1 { font-size: 2rem; font-weight: 600; margin-bottom: 0.5rem; }
+h2 { font-size: 1.5rem; font-weight: 600; margin: 1.5rem 0 0.5rem; }
+h3 { font-size: 1.25rem; font-weight: 600; margin: 1.25rem 0 0.5rem; }
+p { margin-bottom: 1rem; }
+a { color: #0066cc; text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+/* HEADER - МІНІМАЛЬНИЙ */
 header {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-    padding: 2rem 0;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    border-bottom: 2px solid #000;
+    padding-bottom: 20px;
+    margin-bottom: 40px;
 }
 
-header h1 {
+header h1 a {
+    color: #000;
     font-size: 2.5rem;
-    margin-bottom: 0.5rem;
+    font-weight: 700;
 }
 
-header p {
-    font-size: 1.1rem;
-    opacity: 0.9;
-}
-
-/* Navigation */
-nav {
-    background-color: #fff;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-    position: sticky;
-    top: 0;
-    z-index: 100;
-}
-
-nav ul {
-    list-style: none;
-    display: flex;
-    justify-content: center;
-    flex-wrap: wrap;
-    padding: 0;
-}
-
-nav ul li {
-    margin: 0;
-}
-
-nav ul li a {
-    display: block;
-    padding: 1rem 1.5rem;
-    color: #667eea;
+header h1 a:hover {
     text-decoration: none;
-    font-weight: 500;
-    transition: all 0.3s ease;
 }
 
-nav ul li a:hover,
-nav ul li a.active {
-    background-color: #667eea;
-    color: white;
+.site-logo {
+    margin-bottom: 10px;
 }
 
-/* Remove underlines from all icons */
-a .icon,
-a i,
-.icon,
-i {
-    text-decoration: none !important;
+.site-logo img {
+    max-height: 50px;
 }
 
-a:has(.icon),
-a:has(i) {
-    text-decoration: none !important;
+/* НАВІГАЦІЯ - ПРОСТА */
+nav {
+    margin-top: 15px;
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
 }
 
-/* Main Content */
-main {
-    flex: 1;
-    padding: 2rem 0;
+nav a {
+    color: #666;
+    font-size: 0.95rem;
 }
 
-/* Post Styles */
-.post {
-    background: white;
-    padding: 2rem;
-    margin-bottom: 2rem;
-    border-radius: 8px;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
+nav a:hover {
+    color: #000;
 }
 
-.post:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+/* TIMELINE - ГОЛОВНА */
+article.post {
+    margin-bottom: 50px;
+    padding-bottom: 30px;
+    border-bottom: 1px solid #e0e0e0;
 }
 
-.post-header {
-    border-bottom: 2px solid #667eea;
-    padding-bottom: 1rem;
-    margin-bottom: 1rem;
+article.post:last-child {
+    border-bottom: none;
 }
 
-.post h2 {
-    color: #667eea;
-    margin-bottom: 0.5rem;
-    font-size: 2rem;
+article.post h2 {
+    margin: 0 0 8px 0;
+}
+
+article.post h2 a {
+    color: #000;
 }
 
 .post-meta {
-    color: #777;
-    font-size: 0.9rem;
-    display: flex;
-    gap: 1rem;
-    flex-wrap: wrap;
+    color: #999;
+    font-size: 0.85rem;
+    margin-bottom: 12px;
 }
 
-.post-meta span {
-    display: flex;
-    align-items: center;
-    gap: 0.3rem;
+.post-meta a {
+    color: #999;
+}
+
+.post-meta a:hover {
+    color: #666;
 }
 
 .post-content {
-    margin: 1.5rem 0;
-    line-height: 1.8;
-    color: #444;
+    line-height: 1.7;
 }
 
 .post-content p {
     margin-bottom: 1rem;
 }
 
-.post-content img {
-    max-width: 100%;
-    height: auto;
-    border-radius: 8px;
-    margin: 1rem 0;
+/* ОКРЕМА СТОРІНКА ПОСТА */
+article.post-single {
+    margin-bottom: 40px;
 }
 
-.post-footer {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding-top: 1rem;
-    border-top: 1px solid #eee;
-    flex-wrap: wrap;
-    gap: 1rem;
+/* КОМЕНТАРІ - ПРОСТІ */
+.comments {
+    margin-top: 60px;
+    padding-top: 30px;
+    border-top: 2px solid #e0e0e0;
 }
 
-.read-more {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-    padding: 0.5rem 1.5rem;
-    text-decoration: none;
-    border-radius: 25px;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-    font-weight: 500;
-}
-
-.read-more:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
-}
-
-/* Comments Section - Aegea Style */
-.comments-section {
-    background: white;
-    padding: 2rem;
-    margin-top: 2rem;
-    border-radius: 8px;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-}
-
-.comments-section h3 {
-    color: #667eea;
-    margin-bottom: 1.5rem;
-    font-size: 1.8rem;
-    border-bottom: 2px solid #667eea;
-    padding-bottom: 0.5rem;
+.comments h3 {
+    font-size: 1.25rem;
+    margin-bottom: 20px;
 }
 
 .comment {
+    margin-bottom: 25px;
+    padding: 15px;
     background: #f9f9f9;
-    padding: 1.5rem;
-    margin-bottom: 1.5rem;
-    border-radius: 8px;
-    border-left: 4px solid #667eea;
-    transition: all 0.3s ease;
-}
-
-.comment:hover {
-    background: #f0f0f0;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-}
-
-.comment-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 1rem;
-    flex-wrap: wrap;
-    gap: 0.5rem;
+    border-left: 3px solid #ddd;
 }
 
 .comment-author {
-    font-weight: bold;
-    color: #667eea;
-    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 5px;
 }
 
 .comment-date {
-    color: #777;
-    font-size: 0.9rem;
+    color: #999;
+    font-size: 0.85rem;
+    margin-bottom: 10px;
 }
 
-.comment-content {
-    color: #444;
-    line-height: 1.6;
-    margin-bottom: 0.5rem;
+/* ФОРМИ - МІНІМАЛЬНІ */
+input[type="text"],
+input[type="password"],
+input[type="email"],
+input[type="number"],
+textarea,
+select {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 0;
+    font-size: 1rem;
+    font-family: inherit;
 }
 
-/* Admin Reply Styles - Blue Border */
-.comment.admin-reply {
-    background: #e8f4ff;
-    border-left: 4px solid #2196F3;
-    margin-left: 2rem;
-    position: relative;
+input:focus,
+textarea:focus,
+select:focus {
+    outline: none;
+    border-color: #000;
 }
 
-.comment.admin-reply::before {
-    content: "👤 Admin";
-    position: absolute;
-    top: -10px;
-    left: 10px;
-    background: #2196F3;
-    color: white;
-    padding: 2px 10px;
-    border-radius: 12px;
-    font-size: 0.8rem;
-    font-weight: bold;
+textarea {
+    min-height: 120px;
+    resize: vertical;
 }
 
-.comment.admin-reply:hover {
-    background: #d6ebff;
+button,
+.button {
+    display: inline-block;
+    padding: 10px 20px;
+    background: #000;
+    color: #fff;
+    border: none;
+    cursor: pointer;
+    font-size: 0.95rem;
+    font-weight: 600;
+    text-decoration: none;
 }
 
-.comment.admin-reply .comment-author {
-    color: #2196F3;
-}
-
-/* Comment Form */
-.comment-form {
-    background: #f9f9f9;
-    padding: 2rem;
-    border-radius: 8px;
-    margin-top: 2rem;
-}
-
-.comment-form h4 {
-    color: #667eea;
-    margin-bottom: 1rem;
+button:hover,
+.button:hover {
+    background: #333;
+    text-decoration: none;
 }
 
 .form-group {
-    margin-bottom: 1.5rem;
+    margin-bottom: 20px;
 }
 
 .form-group label {
     display: block;
-    margin-bottom: 0.5rem;
-    color: #555;
-    font-weight: 500;
+    margin-bottom: 5px;
+    font-weight: 600;
 }
 
-.form-group input,
-.form-group textarea {
-    width: 100%;
-    padding: 0.75rem;
-    border: 2px solid #ddd;
-    border-radius: 5px;
-    font-size: 1rem;
-    transition: border-color 0.3s ease;
+/* ПОВІДОМЛЕННЯ */
+.message {
+    padding: 15px;
+    margin-bottom: 20px;
+    border-left: 4px solid;
 }
 
-.form-group input:focus,
-.form-group textarea:focus {
-    outline: none;
-    border-color: #667eea;
+.message.success {
+    background: #e8f5e9;
+    border-color: #4caf50;
+    color: #2e7d32;
 }
 
-.form-group textarea {
-    resize: vertical;
-    min-height: 120px;
+.message.error {
+    background: #ffebee;
+    border-color: #f44336;
+    color: #c62828;
 }
 
-.btn-submit {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-    padding: 0.75rem 2rem;
-    border: none;
-    border-radius: 25px;
-    font-size: 1rem;
-    cursor: pointer;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-    font-weight: 500;
-}
-
-.btn-submit:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
-}
-
-/* RSS Button Styling */
-.rss-button {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    background: #ff6600;
-    color: white;
-    padding: 0.6rem 1.2rem;
-    text-decoration: none;
-    border-radius: 25px;
-    transition: all 0.3s ease;
-    font-weight: 500;
-    box-shadow: 0 2px 5px rgba(255, 102, 0, 0.3);
-}
-
-.rss-button:hover {
-    background: #ff8533;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 10px rgba(255, 102, 0, 0.4);
-    text-decoration: none;
-}
-
-.rss-button i {
-    font-size: 1.2rem;
-}
-
-/* Sidebar */
-.sidebar {
-    background: white;
-    padding: 1.5rem;
-    border-radius: 8px;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-}
-
-.sidebar h3 {
-    color: #667eea;
-    margin-bottom: 1rem;
-    font-size: 1.3rem;
-}
-
-.sidebar ul {
-    list-style: none;
-}
-
-.sidebar ul li {
-    padding: 0.5rem 0;
-    border-bottom: 1px solid #eee;
-}
-
-.sidebar ul li:last-child {
-    border-bottom: none;
-}
-
-.sidebar ul li a {
-    color: #555;
-    text-decoration: none;
-    transition: color 0.3s ease;
-}
-
-.sidebar ul li a:hover {
-    color: #667eea;
-}
-
-/* Footer Styles - Aegea Style */
-.footer {
-    text-align: center;
-    padding: 1rem 0;
-    color: var(--foregroundColor);
-    border-top: 1px solid var(--thinRuleColor);
-    margin-top: 3rem;
-}
-
-.footer a {
-    text-decoration: none;
-}
-
-.footer a i {
-    text-decoration: none !important;
-}
-
-.footer .engine {
-    margin-top: 0.5rem;
-    font-size: 0.9rem;
-    color: var(--engineTextColor);
-}
-
-.footer .engine a {
-    color: var(--engineTextColor);
-    text-decoration: none;
-}
-
-.footer .engine a:hover {
-    color: var(--hoverColor);
-}
-
-.footer .e2-visual-login {
-    display: inline-block;
-    margin: 0 0.5rem;
-    text-decoration: none;
-    cursor: pointer;
-}
-
-.footer .e2-visual-login:hover {
-    opacity: 0.7;
-}
-
-.footer .e2-visual-login i {
-    text-decoration: none !important;
-}
-
-.footer .e2-admin-link {
-    text-decoration: none;
-    cursor: pointer;
-}
-
-.footer .e2-rss-button {
-    color: var(--foregroundColor);
-    margin-left: 0.5rem;
-    text-decoration: none;
-    cursor: pointer;
-}
-
-.footer .e2-rss-button:hover {
-    color: var(--hoverColor);
-}
-
-.footer .e2-rss-button i {
-    text-decoration: none !important;
-}
-
-footer {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-    padding: 2rem 0;
-    margin-top: auto;
-    box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
-}
-
-.footer-content {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 1rem;
-}
-
-.footer-left {
-    flex: 1;
-}
-
-.footer-right {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-}
-
-footer p {
-    margin: 0;
-    opacity: 0.9;
-}
-
-/* Admin Login Button - Visual Lock Icon */
-.admin-login-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    background: rgba(255, 255, 255, 0.2);
-    color: white;
-    padding: 0.6rem 1.2rem;
-    text-decoration: none;
-    border-radius: 25px;
-    transition: all 0.3s ease;
-    font-weight: 500;
-    border: 2px solid rgba(255, 255, 255, 0.3);
-    backdrop-filter: blur(10px);
-}
-
-.admin-login-btn:hover {
-    background: rgba(255, 255, 255, 0.3);
-    border-color: rgba(255, 255, 255, 0.5);
-    transform: translateY(-2px);
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-    text-decoration: none;
-}
-
-.admin-login-btn i {
-    font-size: 1.2rem;
-}
-
-/* Hide admin login when logged in */
-.logged-in .admin-login-btn {
-    display: none;
-}
-
-/* Pagination */
+/* ПАГІНАЦІЯ */
 .pagination {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 0.5rem;
-    margin-top: 2rem;
-    flex-wrap: wrap;
+    margin: 40px 0;
+    text-align: center;
 }
 
 .pagination a,
 .pagination span {
-    padding: 0.5rem 1rem;
-    background: white;
-    color: #667eea;
-    text-decoration: none;
-    border-radius: 5px;
-    border: 2px solid #667eea;
-    transition: all 0.3s ease;
+    margin: 0 10px;
 }
 
-.pagination a:hover,
-.pagination span.active {
-    background: #667eea;
-    color: white;
+/* ТАБЛИЦІ - АДМІНКА */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 20px 0;
 }
 
-.pagination span.active {
-    font-weight: bold;
+th {
+    text-align: left;
+    padding: 12px;
+    background: #f5f5f5;
+    font-weight: 600;
+    border-bottom: 2px solid #ddd;
 }
 
-/* Forms */
-.form-container {
-    max-width: 600px;
-    margin: 2rem auto;
-    background: white;
-    padding: 2rem;
-    border-radius: 8px;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+td {
+    padding: 12px;
+    border-bottom: 1px solid #e0e0e0;
 }
 
-.form-container h2 {
-    color: #667eea;
-    margin-bottom: 1.5rem;
-    text-align: center;
+tr:hover {
+    background: #fafafa;
 }
 
-/* Alerts */
-.alert {
-    padding: 1rem;
-    margin-bottom: 1rem;
-    border-radius: 5px;
-    border-left: 4px solid;
+/* ВКЛАДКИ - АДМІНКА */
+.tabs {
+    display: flex;
+    gap: 0;
+    border-bottom: 2px solid #000;
+    margin-bottom: 30px;
 }
 
-.alert-success {
-    background: #d4edda;
-    border-color: #28a745;
-    color: #155724;
-}
-
-.alert-error {
-    background: #f8d7da;
-    border-color: #dc3545;
-    color: #721c24;
-}
-
-.alert-info {
-    background: #d1ecf1;
-    border-color: #17a2b8;
-    color: #0c5460;
-}
-
-/* Buttons */
-.btn {
-    display: inline-block;
-    padding: 0.6rem 1.5rem;
-    text-decoration: none;
-    border-radius: 25px;
-    transition: all 0.3s ease;
-    font-weight: 500;
+.tab {
+    padding: 12px 24px;
+    background: none;
     border: none;
     cursor: pointer;
-}
-
-.btn-primary {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-}
-
-.btn-primary:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
-}
-
-.btn-secondary {
-    background: #6c757d;
-    color: white;
-}
-
-.btn-secondary:hover {
-    background: #5a6268;
-}
-
-.btn-danger {
-    background: #dc3545;
-    color: white;
-}
-
-.btn-danger:hover {
-    background: #c82333;
-}
-
-/* Responsive Design */
-@media (max-width: 768px) {
-    header h1 {
-        font-size: 2rem;
-    }
-    
-    nav ul {
-        flex-direction: column;
-    }
-    
-    nav ul li {
-        width: 100%;
-        text-align: center;
-    }
-    
-    .post h2 {
-        font-size: 1.5rem;
-    }
-    
-    .post-meta {
-        flex-direction: column;
-        gap: 0.5rem;
-    }
-    
-    .footer-content {
-        flex-direction: column;
-        text-align: center;
-    }
-    
-    .comment.admin-reply {
-        margin-left: 1rem;
-    }
-}
-
-@media (max-width: 480px) {
-    .container {
-        padding: 0 10px;
-    }
-    
-    .post,
-    .comments-section,
-    .sidebar {
-        padding: 1rem;
-    }
-    
-    header h1 {
-        font-size: 1.5rem;
-    }
-    
-    .comment.admin-reply {
-        margin-left: 0.5rem;
-    }
-}
-
-/* Utility Classes */
-.text-center {
-    text-align: center;
-}
-
-.mt-1 { margin-top: 1rem; }
-.mt-2 { margin-top: 2rem; }
-.mb-1 { margin-bottom: 1rem; }
-.mb-2 { margin-bottom: 2rem; }
-.p-1 { padding: 1rem; }
-.p-2 { padding: 2rem; }
-
-/* Loading Animation */
-.loading {
-    display: inline-block;
-    width: 20px;
-    height: 20px;
-    border: 3px solid rgba(102, 126, 234, 0.3);
-    border-radius: 50%;
-    border-top-color: #667eea;
-    animation: spin 1s ease-in-out infinite;
-}
-
-@keyframes spin {
-    to { transform: rotate(360deg); }
-}
-
-/* Icon Styles - No Underlines */
-.icon {
-    text-decoration: none !important;
-    display: inline-block;
-}
-
-a .icon,
-a i.icon {
-    text-decoration: none !important;
-}
-
-/* No underline class */
-.nu,
-a.nu {
-    text-decoration: none !important;
-}
-
-/* Admin navigation */
-.admin-links-floating {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-}
-
-.admin-menu {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-}
-
-.admin-icon {
-    display: inline-flex;
-    align-items: center;
-}
-
-.admin-icon a {
-    text-decoration: none;
-    cursor: pointer;
-    display: inline-flex;
-    align-items: center;
-    padding: 4px 8px;
-    border-radius: 4px;
-    transition: background-color 0.2s;
-}
-
-.admin-icon a:hover {
-    background-color: rgba(0, 0, 0, 0.05);
-}
-
-/* SVG icons */
-.e2-svgi {
-    display: inline-flex;
-    align-items: center;
-    width: 16px;
-    height: 16px;
-}
-
-.e2-svgi svg {
-    width: 100%;
-    height: 100%;
-    fill: currentColor;
-}
-
-.e2-svgi a,
-a .e2-svgi {
-    text-decoration: none !important;
-    cursor: pointer;
-}
-
-/* Social Links */
-.social-links {
-    display: flex;
-    gap: 1rem;
-    align-items: center;
-}
-
-.social-links a {
-    color: white;
-    font-size: 1.5rem;
-    text-decoration: none;
-    transition: transform 0.3s ease;
-}
-
-.social-links a:hover {
-    transform: scale(1.2);
-}
-
-/* Comments Section */
-.e2-pages-back {
-    margin-top: 40px;
-}
-
-.comments-section {
-    margin-top: 60px;
-    max-width: 720px;
-}
-
-.comments-heading {
-    font-size: 24px;
-    margin-bottom: 30px;
-}
-
-.comment {
-    margin-bottom: 30px;
-    padding-bottom: 30px;
-    border-bottom: 1px solid var(--thinRuleColor);
-}
-
-.comment-author {
-    font-weight: bold;
-    margin-bottom: 8px;
-}
-
-.comment-time {
-    font-size: 13px;
-    opacity: 0.6;
-    margin-bottom: 12px;
-}
-
-.comment-content {
-    line-height: 24px;
-}
-
-.comments-empty {
-    opacity: 0.6;
-    margin-bottom: 30px;
-}
-
-/* Аватарки коментарів */
-.e2-comment-userpic-area {
-    flex-shrink: 0;
-}
-
-.e2-comment-userpic-area-inner {
-    width: 48px;
-    height: 48px;
-    border-radius: 50%;
-    overflow: hidden;
-    background: #e0e0e0;
-}
-
-.e2-comment-userpic-area-inner-placeholder {
-    width: 100%;
-    height: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.e2-comment-userpic-area-inner-placeholder svg {
-    width: 32px;
-    height: 32px;
-    fill: #999;
-}
-
-.e2-comment-userpic-image {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
-
-.comment-form-heading {
-    font-size: 20px;
-    margin: 40px 0 20px;
-}
-
-.comment-form .form-group {
-    margin-bottom: 16px;
-}
-
-.comment-form .form-label {
-    display: block;
-    margin-bottom: 8px;
+    font-size: 1rem;
+    color: #666;
     font-weight: 500;
+    border-bottom: 3px solid transparent;
+    margin-bottom: -2px;
 }
 
-.comment-form .form-input,
-.comment-form .form-textarea {
-    width: 100%;
-    padding: 10px;
-    border: 1px solid var(--thinRuleColor);
-    border-radius: 6px;
-    font-family: inherit;
-    font-size: 16px;
+.tab:hover {
+    color: #000;
 }
 
-.comment-form .form-textarea {
-    resize: vertical;
-}
-/* Теги та Band */
-.band {
-    display: inline-flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    align-items: center;
+.tab.active {
+    color: #000;
+    font-weight: 600;
+    border-bottom-color: #000;
 }
 
-.band-item {
-    display: inline-block;
+.tab-content {
+    display: none;
 }
 
-.band-item-inner {
-    display: inline-block;
+.tab-content.active {
+    display: block;
 }
 
-.e2-tag {
-    display: inline-block;
-    padding: 4px 12px;
-    background: var(--inputBackgroundColor);
-    color: var(--textColor);
-    text-decoration: none;
-    border-radius: 4px;
-    font-size: 14px;
-    transition: background 0.2s;
+/* УТИЛІТИ */
+.empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: #999;
 }
 
-.e2-tag:hover {
-    background: var(--thinRuleColor);
+.hidden {
+    display: none;
 }
 
-/* Font Awesome іконки */
-.fas, .far, .fab {
-    margin-right: 4px;
+/* ВИДАЛИТИ ІКОНКИ (мінімалізм) */
+i {
+    display: none;
 }
 
-.e2-search-icon i {
-    font-size: 16px;
-}
-
-.footer i {
-    margin-right: 4px;
+/* FOOTER */
+footer {
+    margin-top: 60px;
+    padding-top: 30px;
+    border-top: 1px solid #e0e0e0;
+    color: #999;
+    font-size: 0.85rem;
 }

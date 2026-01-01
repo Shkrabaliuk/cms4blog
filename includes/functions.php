@@ -103,15 +103,55 @@ function excerpt($text, $limit = 300) {
 }
 
 function markdown($text) {
+    // Gallery shortcode: [gallery]img1.jpg|Caption 1,img2.jpg|Caption 2[/gallery]
+    $text = preg_replace_callback('/\[gallery\](.*?)\[\/gallery\]/s', function($matches) {
+        $items = explode(',', $matches[1]);
+        $images = [];
+        foreach ($items as $item) {
+            $item = trim($item);
+            if (strpos($item, '|') !== false) {
+                list($src, $caption) = explode('|', $item, 2);
+                $images[trim($src)] = trim($caption);
+            } else {
+                $images[] = trim($item);
+            }
+        }
+        return gallery($images);
+    }, $text);
+    
+    // Code blocks з ```
+    $text = preg_replace('/```([a-z]*)\n([\s\S]*?)```/', '<pre><code>$2</code></pre>', $text);
+    
+    // Inline code з `
+    $text = preg_replace('/`([^`]+)`/', '<code>$1</code>', $text);
+    
+    // Заголовки
     $text = preg_replace('/^### (.+)$/m', '<h3>$1</h3>', $text);
     $text = preg_replace('/^## (.+)$/m', '<h2>$1</h2>', $text);
     $text = preg_replace('/^# (.+)$/m', '<h1>$1</h1>', $text);
+    
+    // Blockquotes
+    $text = preg_replace('/^> (.+)$/m', '<blockquote>$1</blockquote>', $text);
+    
+    // Жирний та курсив
     $text = preg_replace('/\*\*(.+?)\*\*/', '<strong>$1</strong>', $text);
     $text = preg_replace('/\*(.+?)\*/', '<em>$1</em>', $text);
+    
+    // Посилання
     $text = preg_replace('/\[([^\]]+)\]\(([^\)]+)\)/', '<a href="$2">$1</a>', $text);
+    
+    // Нумеровані списки
+    $text = preg_replace('/^\d+\. (.+)$/m', '<li>$1</li>', $text);
+    
+    // Марковані списки
     $text = preg_replace('/^- (.+)$/m', '<li>$1</li>', $text);
+    
+    // Обгортаємо списки в ul/ol
     $text = preg_replace('/(<li>.*<\/li>)/s', '<ul>$1</ul>', $text);
+    
+    // Параграфи
     $text = '<p>' . preg_replace('/\n\n/', '</p><p>', $text) . '</p>';
+    
     return $text;
 }
 
@@ -305,18 +345,116 @@ function verify_csrf_token($token) {
  * Перевірити rate limit для коментарів
  */
 function check_comment_rate_limit($ip_address) {
-    global $pdo;
+    // Використовуємо сесію для простого rate limiting
+    if (!isset($_SESSION['comment_timestamps'])) {
+        $_SESSION['comment_timestamps'] = [];
+    }
     
-    // Перевірка: не більше 5 коментарів за 5 хвилин з одного IP
-    $stmt = $pdo->prepare("
-        SELECT COUNT(*) FROM comments 
-        WHERE created_at > DATE_SUB(NOW(), INTERVAL 5 MINUTE)
-        AND author LIKE ?
-    ");
-    // Зберігаємо IP в кінці author як мітку (можна створити окрему таблицю)
-    $stmt->execute(["%[$ip_address]"]);
-    $count = $stmt->fetchColumn();
+    $now = time();
+    $five_minutes_ago = $now - 300;
     
-    return $count < 5;
+    // Видаляємо старі мітки часу
+    $_SESSION['comment_timestamps'] = array_filter(
+        $_SESSION['comment_timestamps'],
+        function($timestamp) use ($five_minutes_ago) {
+            return $timestamp > $five_minutes_ago;
+        }
+    );
+    
+    // Перевірка: не більше 5 коментарів за 5 хвилин
+    if (count($_SESSION['comment_timestamps']) >= 5) {
+        return false;
+    }
+    
+    // Додаємо поточний час
+    $_SESSION['comment_timestamps'][] = $now;
+    
+    return true;
 }
 
+/**
+ * Збільшити лічильник переглядів поста
+ */
+function increment_post_views($post_id) {
+    global $pdo;
+    
+    // Перевіряємо чи користувач вже переглядав цей пост в цій сесії
+    if (!isset($_SESSION['viewed_posts'])) {
+        $_SESSION['viewed_posts'] = [];
+    }
+    
+    // Якщо вже переглядав - не збільшуємо
+    if (in_array($post_id, $_SESSION['viewed_posts'])) {
+        return;
+    }
+    
+    // Додаємо до списку переглянутих
+    $_SESSION['viewed_posts'][] = $post_id;
+    
+    // Збільшуємо лічильник
+    try {
+        $stmt = $pdo->prepare("UPDATE posts SET view_count = view_count + 1 WHERE id = ?");
+        $stmt->execute([$post_id]);
+    } catch (PDOException $e) {
+        // Якщо колонка view_count не існує - ігноруємо
+        error_log("increment_post_views error: " . $e->getMessage());
+    }
+}
+
+/**
+ * Отримати кількість переглядів поста
+ */
+function get_post_views($post_id) {
+    global $pdo;
+    
+    try {
+        $stmt = $pdo->prepare("SELECT view_count FROM posts WHERE id = ?");
+        $stmt->execute([$post_id]);
+        $result = $stmt->fetch();
+        return $result ? (int)$result['view_count'] : 0;
+    } catch (PDOException $e) {
+        return 0;
+    }
+}
+
+/**
+ * Create Fotorama gallery from images array
+ * Usage: gallery(['img1.jpg' => 'Caption 1', 'img2.jpg' => 'Caption 2'])
+ */
+function gallery($images, $options = []) {
+    $defaults = [
+        'width' => '100%',
+        'ratio' => '16/9',
+        'nav' => 'thumbs',
+        'allowfullscreen' => true,
+    ];
+    
+    $options = array_merge($defaults, $options);
+    
+    $attrs = [];
+    foreach ($options as $key => $value) {
+        if (is_bool($value)) {
+            $attrs[] = $value ? $key : '';
+        } else {
+            $attrs[] = 'data-' . $key . '="' . htmlspecialchars($value) . '"';
+        }
+    }
+    
+    $html = '<div class="fotorama" ' . implode(' ', array_filter($attrs)) . '>';
+    
+    foreach ($images as $src => $caption) {
+        if (is_numeric($src)) {
+            $src = $caption;
+            $caption = '';
+        }
+        $html .= '<img src="' . htmlspecialchars($src) . '"';
+        if ($caption) {
+            $html .= ' data-caption="' . htmlspecialchars($caption) . '"';
+        }
+        $html .= '>';
+    }
+    
+    $html .= '</div>';
+    
+    return $html;
+}

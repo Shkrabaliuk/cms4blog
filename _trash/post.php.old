@@ -1,0 +1,96 @@
+<?php
+require_once 'includes/db.php';
+require_once 'includes/functions.php';
+
+$id = $_GET['id'] ?? null;
+if (!$id) {
+    header("Location: /index.php");
+    exit;
+}
+
+$post = get_post($id);
+if (!$post) {
+    header("Location: /404.php");
+    exit;
+}
+
+increment_post_views($id);
+
+$pageTitle = $post['title'];
+require 'includes/templates/header.php';
+?>
+
+<article class="post post-single">
+    <h1><?= htmlspecialchars($post['title']) ?></h1>
+    <div class="post-meta">
+        <i class="fa-regular fa-clock"></i> <?= time_ago($post['created_at']) ?>
+        <?php if (get_setting('show_view_counts', '0') === '1'): ?>
+            · <i class="fa-regular fa-eye"></i> <?= get_post_views($id) ?> переглядів
+        <?php endif; ?>
+        <?php if (!empty($post['tags'])): ?>
+            <?php foreach (parse_tags($post['tags']) as $tag): ?>
+                · <a href="/tags.php?tag=<?= urlencode($tag) ?>"><i class="fa-solid fa-tag"></i> <?= htmlspecialchars($tag) ?></a>
+            <?php endforeach; ?>
+        <?php endif; ?>
+        <?php if (is_admin()): ?>
+            · <a href="/admin/post-editor.php?id=<?= $post['id'] ?>"><i class="fa-solid fa-pen-to-square"></i> Редагувати</a>
+        <?php endif; ?>
+    </div>
+    <div class="post-content">
+        <?= markdown($post['content']) ?>
+    </div>
+</article>
+
+<?php if (isset($_GET['comment']) && $_GET['comment'] === 'pending'): ?>
+<div class="message success">
+    Ваш коментар надіслано на модерацію.
+</div>
+<?php endif; ?>
+
+<?php
+$comments = get_comments($post['id']);
+$comment_count = count($comments);
+?>
+
+<?php if ($comment_count > 0): ?>
+<div class="comments">
+    <h3><i class="fa-solid fa-comments"></i> <?= $comment_count ?> <?= $comment_count == 1 ? 'коментар' : ($comment_count < 5 ? 'коментарі' : 'коментарів') ?></h3>
+    
+    <?php foreach ($comments as $comment): ?>
+    <div class="comment">
+        <div class="comment-author"><i class="fa-solid fa-user"></i> <?= htmlspecialchars($comment['author']) ?></div>
+        <div class="comment-date"><i class="fa-regular fa-clock"></i> <?= time_ago($comment['created_at']) ?></div>
+        <div class="comment-content">
+            <?= markdown($comment['content']) ?>
+        </div>
+    </div>
+    <?php endforeach; ?>
+</div>
+<?php endif; ?>
+
+<div class="comment-form">
+    <h4>Залишити коментар</h4>
+    <form method="POST" action="/add-comment.php">
+        <input type="hidden" name="post_id" value="<?= $post['id'] ?>">
+        <input type="hidden" name="csrf_token" value="<?= generate_csrf_token() ?>">
+        
+        <div class="form-group">
+            <label>Ім'я:</label>
+            <input type="text" name="author" required>
+        </div>
+        
+        <div class="form-group">
+            <label>Email (не публікується):</label>
+            <input type="email" name="email" required>
+        </div>
+        
+        <div class="form-group">
+            <label>Коментар:</label>
+            <textarea name="content" required></textarea>
+        </div>
+        
+        <button type="submit"><i class="fa-solid fa-paper-plane"></i> Відправити</button>
+    </form>
+</div>
+
+<?php require 'includes/templates/footer.php'; ?>

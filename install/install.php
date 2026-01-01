@@ -77,7 +77,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 `content` text NOT NULL,
                 `tags` text,
                 `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-                PRIMARY KEY (`id`)
+                `view_count` int(11) NOT NULL DEFAULT 0,
+                PRIMARY KEY (`id`),
+                KEY `view_count` (`view_count`)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;");
 
             // Таблиця налаштувань
@@ -125,15 +127,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             // Дефолтні налаштування
             $defaults = [
-                'blog_name' => 'Мій Блог',
-                'blog_subtitle' => 'Підзаголовок',
-                'author_name' => '',
-                'blog_description' => '',
+                'blog_name' => '/\\ogos',
+                'blog_subtitle' => 'Мінімалістичний блог-движок',
+                'author_name' => 'Yaroslav',
+                'blog_description' => 'Блог у стилі Aegea від Іллі Бірмана',
                 'posts_per_page' => '10',
-                'show_view_counts' => '0',
-                'footer_text' => '© Автор блогу',
-                'footer_engine' => 'Рушій — Мій',
-                'avatar' => ''
+                'show_view_counts' => '1',
+                'footer_text' => '© 2026 /\\ogos',
+                'footer_engine' => 'Движок: Aegea-inspired',
+                'avatar' => '',
+                'logo_path' => 'assets/images/logo.svg',
+                'show_logo' => '1'
             ];
             
             foreach ($defaults as $key => $value) {
@@ -284,7 +288,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             file_put_contents('../config.php', $config);
 
             $success = 'Встановлення завершено! Перенаправлення...';
-            header("refresh:2;url=../admin/login.php");
+            header("refresh:2;url=../index.php");
         } catch (Exception $e) {
             $error = 'Помилка: ' . $e->getMessage();
         }

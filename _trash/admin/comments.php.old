@@ -1,0 +1,176 @@
+<?php
+require_once '../includes/db.php';
+require_once '../includes/functions.php';
+
+if (!is_admin()) {
+    header("Location: /index.php");
+    exit;
+}
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $comment_id = intval($_POST['comment_id']);
+    $action = $_POST['action'];
+    
+    if ($action === 'approve') {
+        $stmt = $pdo->prepare("UPDATE comments SET status = 'approved' WHERE id = ?");
+        $stmt->execute([$comment_id]);
+        $message = 'Коментар схвалено';
+    } elseif ($action === 'reject') {
+        $stmt = $pdo->prepare("UPDATE comments SET status = 'rejected' WHERE id = ?");
+        $stmt->execute([$comment_id]);
+        $message = 'Коментар відхилено';
+    } elseif ($action === 'delete') {
+        $stmt = $pdo->prepare("DELETE FROM comments WHERE id = ?");
+        $stmt->execute([$comment_id]);
+        $message = 'Коментар видалено';
+    }
+    
+    header("Location: /admin/comments.php?message=" . urlencode($message));
+    exit;
+}
+
+$status_filter = $_GET['status'] ?? 'pending';
+$page = max(1, intval($_GET['page'] ?? 1));
+$comments_per_page = 20;
+
+$stmt = $pdo->prepare("SELECT COUNT(*) FROM comments WHERE status = ?");
+$stmt->execute([$status_filter]);
+$total = $stmt->fetchColumn();
+
+$offset = ($page - 1) * $comments_per_page;
+$stmt = $pdo->prepare("
+    SELECT c.*, p.title as post_title 
+    FROM comments c 
+    LEFT JOIN posts p ON c.post_id = p.id 
+    WHERE c.status = ? 
+    ORDER BY c.created_at DESC 
+    LIMIT $comments_per_page OFFSET $offset
+");
+$stmt->execute([$status_filter]);
+$comments = $stmt->fetchAll();
+
+$total_pages = ceil($total / $comments_per_page);
+
+$stmt = $pdo->query("SELECT COUNT(*) FROM comments WHERE status = 'pending'");
+$pending_count = $stmt->fetchColumn();
+
+$pageTitle = "Коментарі";
+require '../includes/templates/header.php';
+?>
+
+<div class="admin-nav">
+    <a href="/admin/admin.php"><i class="fa-solid fa-file-lines"></i> Пости</a>
+    <a href="/admin/comments.php" class="active"><i class="fa-solid fa-comments"></i> Коментарі <?php if ($pending_count > 0): ?><span style="background: #cc0000; color: white; padding: 2px 6px; border-radius: 10px; font-size: 12px; margin-left: 5px;"><?= $pending_count ?></span><?php endif; ?></a>
+    <a href="/admin/settings.php"><i class="fa-solid fa-gear"></i> Налаштування</a>
+</div>
+
+<h2>Коментарі</h2>
+
+<?php if (isset($_GET['message'])): ?>
+<div class="message success"><?= htmlspecialchars($_GET['message']) ?></div>
+<?php endif; ?>
+
+<div style="margin: 20px 0; display: flex; gap: 10px;">
+    <a href="?status=pending" class="<?= $status_filter === 'pending' ? 'button' : '' ?>" style="<?= $status_filter === 'pending' ? '' : 'color: #666; text-decoration: underline;' ?>">
+        На модерації <?php 
+        $stmt = $pdo->query("SELECT COUNT(*) FROM comments WHERE status = 'pending'");
+        echo '(' . $stmt->fetchColumn() . ')';
+        ?>
+    </a>
+    <a href="?status=approved" class="<?= $status_filter === 'approved' ? 'button' : '' ?>" style="<?= $status_filter === 'approved' ? '' : 'color: #666; text-decoration: underline;' ?>">
+        Схвалені <?php 
+        $stmt = $pdo->query("SELECT COUNT(*) FROM comments WHERE status = 'approved'");
+        echo '(' . $stmt->fetchColumn() . ')';
+        ?>
+    </a>
+    <a href="?status=rejected" class="<?= $status_filter === 'rejected' ? 'button' : '' ?>" style="<?= $status_filter === 'rejected' ? '' : 'color: #666; text-decoration: underline;' ?>">
+        Відхилені <?php 
+        $stmt = $pdo->query("SELECT COUNT(*) FROM comments WHERE status = 'rejected'");
+        echo '(' . $stmt->fetchColumn() . ')';
+        ?>
+    </a>
+</div>
+
+<?php if (count($comments) > 0): ?>
+<table>
+    <thead>
+        <tr>
+            <th>Автор</th>
+            <th>Коментар</th>
+            <th>Пост</th>
+            <th>Дата</th>
+            <th>Дії</th>
+        </tr>
+    </thead>
+    <tbody>
+        <?php foreach ($comments as $comment): ?>
+        <tr>
+            <td>
+                <strong><?= htmlspecialchars($comment['author']) ?></strong><br>
+                <small style="color: #999;"><?= htmlspecialchars($comment['email']) ?></small>
+            </td>
+            <td style="max-width: 400px;">
+                <?= nl2br(htmlspecialchars(mb_substr($comment['content'], 0, 200))) ?>
+                <?php if (mb_strlen($comment['content']) > 200): ?>...<?php endif; ?>
+            </td>
+            <td>
+                <a href="/post.php?id=<?= $comment['post_id'] ?>" target="_blank">
+                    <?= htmlspecialchars($comment['post_title']) ?>
+                </a>
+            </td>
+            <td><?= time_ago($comment['created_at']) ?></td>
+            <td>
+                <?php if ($comment['status'] === 'pending'): ?>
+                    <form method="POST" style="display: inline;">
+                        <input type="hidden" name="comment_id" value="<?= $comment['id'] ?>">
+                        <input type="hidden" name="action" value="approve">
+                        <button type="submit" style="background: none; border: none; color: #008800; cursor: pointer; text-decoration: underline;">Схвалити</button>
+                    </form>
+                    <form method="POST" style="display: inline;">
+                        <input type="hidden" name="comment_id" value="<?= $comment['id'] ?>">
+                        <input type="hidden" name="action" value="reject">
+                        <button type="submit" style="background: none; border: none; color: #cc6600; cursor: pointer; text-decoration: underline;">Відхилити</button>
+                    </form>
+                <?php elseif ($comment['status'] === 'approved'): ?>
+                    <form method="POST" style="display: inline;">
+                        <input type="hidden" name="comment_id" value="<?= $comment['id'] ?>">
+                        <input type="hidden" name="action" value="reject">
+                        <button type="submit" style="background: none; border: none; color: #cc6600; cursor: pointer; text-decoration: underline;">Відхилити</button>
+                    </form>
+                <?php elseif ($comment['status'] === 'rejected'): ?>
+                    <form method="POST" style="display: inline;">
+                        <input type="hidden" name="comment_id" value="<?= $comment['id'] ?>">
+                        <input type="hidden" name="action" value="approve">
+                        <button type="submit" style="background: none; border: none; color: #008800; cursor: pointer; text-decoration: underline;">Схвалити</button>
+                    </form>
+                <?php endif; ?>
+                <form method="POST" style="display: inline;" onsubmit="return confirm('Видалити цей коментар?')">
+                    <input type="hidden" name="comment_id" value="<?= $comment['id'] ?>">
+                    <input type="hidden" name="action" value="delete">
+                    <button type="submit" style="background: none; border: none; color: #cc0000; cursor: pointer; text-decoration: underline;">Видалити</button>
+                </form>
+            </td>
+        </tr>
+        <?php endforeach; ?>
+    </tbody>
+</table>
+
+<?php if ($total_pages > 1): ?>
+<div class="pagination">
+    <?php if ($page > 1): ?>
+        <a href="?status=<?= $status_filter ?>&page=<?= $page - 1 ?>"><i class="fa-solid fa-chevron-left"></i> Попередня</a>
+    <?php endif; ?>
+    <span>Сторінка <?= $page ?> з <?= $total_pages ?></span>
+    <?php if ($page < $total_pages): ?>
+        <a href="?status=<?= $status_filter ?>&page=<?= $page + 1 ?>">Наступна <i class="fa-solid fa-chevron-right"></i></a>
+    <?php endif; ?>
+</div>
+<?php endif; ?>
+
+<?php else: ?>
+<div class="empty-state">
+    <p>Коментарів не знайдено</p>
+</div>
+<?php endif; ?>
+
+<?php require '../includes/templates/footer.php'; ?>

@@ -1,0 +1,10 @@
+        </main>
+        <footer>
+            <div class="container">
+                © <?= htmlspecialchars(get_setting('author_name') ?: get_setting('footer_text', 'Автор блогу')) ?>, <?= date('Y') ?>
+                <a href="/rss.php"><i class="fa-solid fa-rss"></i> RSS</a>
+            </div>
+        </footer>
+    </div>
+</body>
+</html>

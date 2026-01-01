@@ -1,3 +1,18 @@
+/* Видалення підкреслення для всіх іконок */
+a i, button i {
+    text-decoration: none !important;
+    border-bottom: none !important;
+}
+
+a:has(i) {
+    text-decoration: none !important;
+}
+
+i, .fas, .far, .fab, .fa {
+    text-decoration: none !important;
+    border-bottom: none !important;
+}
+
 /* Font Awesome іконки */
 .fas, .far, .fab {
     margin-right: 4px;
@@ -9,15 +24,6 @@
 
 .footer i {
     margin-right: 4px;
-}
-
-/* Видалення підкреслення для всіх іконок */
-a i, button i {
-    text-decoration: none !important;
-}
-
-a:has(i) {
-    text-decoration: none !important;
 }
 
 /* Адмін-панель: загальні стилі */

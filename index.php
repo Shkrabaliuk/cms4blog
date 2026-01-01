@@ -2,72 +2,48 @@
 require_once 'includes/db.php';
 require_once 'includes/functions.php';
 
-$search = $_GET['search'] ?? '';
 $page = max(1, intval($_GET['page'] ?? 1));
-
-$posts = get_posts($search, 'DESC', $page);
-$total = get_total_posts($search);
 $per_page = (int)get_setting('posts_per_page', 10);
+
+$posts = get_posts('', 'DESC', $page);
+$total = get_total_posts('');
 $total_pages = ceil($total / $per_page);
 
-$pageTitle = $search ? "Пошук: $search" : "";
 require 'includes/templates/header.php';
 ?>
 
-<div class="content">
-
-<?php if ($page > 1): ?>
-  <div class="e2-pages">
-    <a href="?<?= $search ? 'search=' . urlencode($search) . '&' : '' ?>page=<?= $page - 1 ?>">Пізніше</a>
-  </div>
-<?php endif; ?>
-
 <?php if (count($posts) > 0): ?>
-  <?php foreach ($posts as $post): ?>
-    <div class="e2-note">
-
-      <article>
-        <h1><a href="/post.php?id=<?= $post['id'] ?>"><?= htmlspecialchars($post['title']) ?></a></h1>
-
-        <div class="e2-note-text">
-          <?= markdown_excerpt($post['content'], 300) ?>
+    <?php foreach ($posts as $post): ?>
+    <article class="post">
+        <h2><a href="/post.php?id=<?= $post['id'] ?>"><?= htmlspecialchars($post['title']) ?></a></h2>
+        <div class="post-meta">
+            <?= time_ago($post['created_at']) ?>
+            <?php if (!empty($post['tags'])): ?>
+                <?php foreach (parse_tags($post['tags']) as $tag): ?>
+                    · <a href="/tags.php?tag=<?= urlencode($tag) ?>"><?= htmlspecialchars($tag) ?></a>
+                <?php endforeach; ?>
+            <?php endif; ?>
         </div>
-      </article>
+        <div class="post-content">
+            <?= markdown_excerpt($post['content'], 400) ?>
+        </div>
+    </article>
+    <?php endforeach; ?>
 
-      <div class="e2-note-meta">
-        <span><i class="far fa-clock"></i> <?= time_ago($post['created_at']) ?></span>
-        <!-- <span><?= estimate_reading_time($post['content']) ?> хв</span> -->
-        <?php if (!empty($post['tags'])): ?>
-          <div class="band">
-            <?php foreach (parse_tags($post['tags']) as $tag): ?>
-              <div class="band-item">
-                <a href="?search=<?= urlencode($tag) ?>" class="e2-tag band-item-inner"><?= htmlspecialchars($tag) ?></a>
-              </div>
-            <?php endforeach; ?>
-          </div>
+    <?php if ($total_pages > 1): ?>
+    <div class="pagination">
+        <?php if ($page > 1): ?>
+            <a href="?page=<?= $page - 1 ?>">← Новіші</a>
         <?php endif; ?>
-      </div>
-
+        <?php if ($page < $total_pages): ?>
+            <a href="?page=<?= $page + 1 ?>">Старіші →</a>
+        <?php endif; ?>
     </div>
-  <?php endforeach; ?>
-
-  <?php if ($page < $total_pages): ?>
-    <div class="e2-pages">
-      <a href="?<?= $search ? 'search=' . urlencode($search) . '&' : '' ?>page=<?= $page + 1 ?>">Раніше</a>
-    </div>
-  <?php endif; ?>
-
-<?php else: ?>
-  <div class="empty-state">
-    <?php if ($search): ?>
-      <p>Нічого не знайдено за запитом "<?= htmlspecialchars($search) ?>"</p>
-      <p><a href="/index.php">Показати всі пости</a></p>
-    <?php else: ?>
-      <p>Тут поки порожньо</p>
     <?php endif; ?>
-  </div>
+<?php else: ?>
+    <div class="empty-state">
+        <p>Поки що немає постів</p>
+    </div>
 <?php endif; ?>
-
-</div>
 
 <?php require 'includes/templates/footer.php'; ?>

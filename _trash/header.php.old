@@ -1,0 +1,68 @@
+<?php
+if (session_status() === PHP_SESSION_NONE) session_start();
+require_once __DIR__ . '/../functions.php';
+
+$blog_name = get_setting('blog_name', 'Мій Блог');
+$blog_subtitle = get_setting('blog_subtitle', '');
+$blog_description = get_setting('blog_description', '');
+?>
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><?= htmlspecialchars($pageTitle ?? $blog_name) ?></title>
+    <link rel="icon" type="image/svg+xml" href="/assets/images/favicon.svg">
+    <?php if ($blog_description): ?>
+    <meta name="description" content="<?= htmlspecialchars($blog_description) ?>">
+    <?php endif; ?>
+    <link rel="stylesheet" href="/assets/fontawesome/css/all.min.css">
+    <link rel="stylesheet" href="/assets/fonts/tildasans.css">
+    <link rel="stylesheet" href="/assets/fotorama/fotorama.css">
+    <link rel="stylesheet" href="/assets/css/style.css">
+    <script src="/assets/fotorama/fotorama.js" defer></script>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <?php 
+            $logo_path = get_setting('logo_path');
+            $show_logo = get_setting('show_logo', '1');
+            ?>
+            <?php if ($logo_path && $show_logo === '1'): ?>
+                <div class="site-logo">
+                    <a href="/index.php">
+                        <img src="<?= htmlspecialchars($logo_path) ?>" alt="<?= htmlspecialchars($blog_name) ?>">
+                    </a>
+                </div>
+            <?php endif; ?>
+            <h1><a href="/index.php"><?= htmlspecialchars($blog_name) ?></a></h1>
+            <?php if ($blog_subtitle): ?>
+            <div class="subtitle"><?= htmlspecialchars($blog_subtitle) ?></div>
+            <?php endif; ?>
+            <nav>
+                <a href="/index.php"><i class="fa-solid fa-home"></i> Головна</a>
+                <a href="/tags.php"><i class="fa-solid fa-tags"></i> Теги</a>
+                <?php if (is_admin()): ?>
+                <a href="/admin/admin.php?tab=posts"><i class="fa-solid fa-file-lines"></i> Пости</a>
+                <a href="/admin/admin.php?tab=comments"><i class="fa-solid fa-comments"></i> Коментарі</a>
+                <a href="/admin/admin.php?tab=settings"><i class="fa-solid fa-gear"></i> Налаштування</a>
+                <a href="/admin/admin.php?logout=1"><i class="fa-solid fa-right-from-bracket"></i> Вийти</a>
+                <?php else: ?>
+                <a href="#" onclick="document.getElementById('login-form').classList.toggle('hidden'); return false;"><i class="fa-solid fa-right-to-bracket"></i> Увійти</a>
+                <?php endif; ?>
+            </nav>
+            <?php if (!is_admin()): ?>
+            <div id="login-form" class="hidden" style="margin-top: 20px; padding: 20px; background: #f9f9f9; border-radius: 5px;">
+                <form method="POST" action="/admin/login.php">
+                    <input type="hidden" name="csrf_token" value="<?= generate_csrf_token() ?>">
+                    <div class="form-group">
+                        <label>Пароль:</label>
+                        <input type="password" name="password" required>
+                    </div>
+                    <button type="submit">Увійти</button>
+                </form>
+            </div>
+            <?php endif; ?>
+        </header>
+        <main class="content">

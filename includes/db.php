@@ -30,6 +30,17 @@ try {
     } catch (PDOException $e) {
         // Ігноруємо помилки міграції (наприклад, якщо таблиця ще не створена)
     }
+    
+    // Автоматична міграція: додавання колонки view_count в posts якщо відсутня
+    try {
+        $columns = $pdo->query("SHOW COLUMNS FROM posts LIKE 'view_count'")->fetchAll();
+        if (empty($columns)) {
+            $pdo->exec("ALTER TABLE `posts` ADD COLUMN `view_count` int(11) NOT NULL DEFAULT 0 AFTER `created_at`");
+            $pdo->exec("ALTER TABLE `posts` ADD KEY `view_count` (`view_count`)");
+        }
+    } catch (PDOException $e) {
+        // Ігноруємо помилки міграції
+    }
 } catch (PDOException $e) {
     // Логування помилки (в продакшені краще використовувати error_log)
     error_log("Database connection error: " . $e->getMessage());

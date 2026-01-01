@@ -1,0 +1,140 @@
+<?php
+require_once '../includes/db.php';
+require_once '../includes/functions.php';
+require_once '../app/Controllers/SettingsController.php';
+
+if (!is_admin()) {
+    header("Location: /index.php");
+    exit;
+}
+
+$controller = new SettingsController();
+
+// Роутинг
+$action = $_GET['action'] ?? 'index';
+
+switch ($action) {
+    case 'upload_logo':
+        $controller->uploadLogo();
+        break;
+        
+    case 'delete_logo':
+        $controller->deleteLogo();
+        break;
+        
+    case 'save':
+        $controller->save();
+        break;
+        
+    default:
+        $controller->index();
+        break;
+}
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    foreach ($_POST as $key => $value) {
+        if ($key === 'csrf_token') continue;
+        
+        if ($key === 'avatar' && isset($_FILES['avatar']) && $_FILES['avatar']['error'] === UPLOAD_ERR_OK) {
+            $upload_dir = '../assets/images/';
+            if (!is_dir($upload_dir)) {
+                mkdir($upload_dir, 0755, true);
+            }
+            
+            $extension = pathinfo($_FILES['avatar']['name'], PATHINFO_EXTENSION);
+            $filename = 'avatar.' . $extension;
+            $upload_path = $upload_dir . $filename;
+            
+            if (move_uploaded_file($_FILES['avatar']['tmp_name'], $upload_path)) {
+                $value = '/assets/images/' . $filename;
+            } else {
+                continue;
+            }
+        }
+        
+        $stmt = $pdo->prepare("INSERT INTO settings (setting_key, setting_value) VALUES (?, ?) ON DUPLICATE KEY UPDATE setting_value = ?");
+        $stmt->execute([$key, $value, $value]);
+    }
+    
+    header("Location: /admin/settings.php?saved=1");
+    exit;
+}
+
+$pageTitle = "Налаштування";
+require '../includes/templates/header.php';
+?>
+
+<div class="admin-nav">
+    <a href="/admin/admin.php"><i class="fa-solid fa-file-lines"></i> Пости</a>
+    <a href="/admin/comments.php"><i class="fa-solid fa-comments"></i> Коментарі</a>
+    <a href="/admin/settings.php" class="active"><i class="fa-solid fa-gear"></i> Налаштування</a>
+</div>
+
+<h2>Налаштування сайту</h2>
+
+<?php if (isset($_GET['saved'])): ?>
+<div class="message success">Налаштування збережено</div>
+<?php endif; ?>
+
+<form method="POST" enctype="multipart/form-data">
+    <input type="hidden" name="csrf_token" value="<?= generate_csrf_token() ?>">
+    
+    <h3>Загальні</h3>
+    
+    <div class="form-group">
+        <label>Назва сайту:</label>
+        <input type="text" name="site_name" value="<?= htmlspecialchars(get_setting('site_name', 'Мій блог')) ?>" required>
+    </div>
+    
+    <div class="form-group">
+        <label>Підзаголовок:</label>
+        <input type="text" name="site_subtitle" value="<?= htmlspecialchars(get_setting('site_subtitle', '')) ?>" placeholder="Необов'язково">
+    </div>
+    
+    <div class="form-group">
+        <label>Автор:</label>
+        <input type="text" name="author_name" value="<?= htmlspecialchars(get_setting('author_name', '')) ?>">
+    </div>
+    
+    <div class="form-group">
+        <label>Аватар:</label>
+        <input type="file" name="avatar" accept="image/*">
+        <?php if ($avatar = get_setting('avatar')): ?>
+            <div style="margin-top: 10px;">
+                <img src="<?= htmlspecialchars($avatar) ?>" style="max-width: 100px; border-radius: 50%;">
+            </div>
+        <?php endif; ?>
+    </div>
+    
+    <h3>Відображення</h3>
+    
+    <div class="form-group">
+        <label>Постів на сторінку:</label>
+        <input type="number" name="posts_per_page" value="<?= intval(get_setting('posts_per_page', 10)) ?>" min="1" max="50">
+    </div>
+    
+    <div class="form-group">
+        <label>
+            <input type="checkbox" name="show_view_counts" value="1" <?= get_setting('show_view_counts', '0') === '1' ? 'checked' : '' ?>>
+            Показувати лічильник переглядів
+        </label>
+    </div>
+    
+    <h3>Коментарі</h3>
+    
+    <div class="form-group">
+        <label>
+            <input type="checkbox" name="comments_require_moderation" value="1" <?= get_setting('comments_require_moderation', '1') === '1' ? 'checked' : '' ?>>
+            Коментарі потребують модерації
+        </label>
+    </div>
+    
+    <div class="form-group">
+        <label>Ліміт коментарів (за годину з одного IP):</label>
+        <input type="number" name="comment_rate_limit" value="<?= intval(get_setting('comment_rate_limit', 5)) ?>" min="1" max="100">
+    </div>
+    
+    <button type="submit"><i class="fa-solid fa-save"></i> Зберегти налаштування</button>
+</form>
+
+<?php require '../includes/templates/footer.php'; ?>

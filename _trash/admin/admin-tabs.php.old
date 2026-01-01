@@ -1,0 +1,537 @@
+<?php
+require_once '../includes/db.php';
+require_once '../includes/functions.php';
+
+// Вихід
+if (isset($_GET['logout'])) {
+    session_start();
+    session_destroy();
+    header("Location: /index.php");
+    exit;
+}
+
+if (!is_admin()) {
+    header("Location: /index.php");
+    exit;
+}
+
+$success_message = '';
+$error_message = '';
+
+// ===== ОБРОБКА ПОСТІВ =====
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
+    $action = $_POST['action'];
+    
+    // Видалення поста
+    if ($action === 'delete_post' && isset($_POST['post_id'])) {
+        $post_id = intval($_POST['post_id']);
+        $stmt = $pdo->prepare("DELETE FROM posts WHERE id = ?");
+        $stmt->execute([$post_id]);
+        $stmt = $pdo->prepare("DELETE FROM comments WHERE post_id = ?");
+        $stmt->execute([$post_id]);
+        $success_message = 'Пост успішно видалено';
+    }
+    
+    // Швидке додавання поста
+    elseif ($action === 'quick_add_post') {
+        $title = trim($_POST['title'] ?? '');
+        $content = trim($_POST['content'] ?? '');
+        $tags = trim($_POST['tags'] ?? '');
+        
+        if ($title && $content) {
+            $stmt = $pdo->prepare("INSERT INTO posts (title, content, tags, created_at) VALUES (?, ?, ?, NOW())");
+            $stmt->execute([$title, $content, $tags]);
+            $success_message = 'Пост успішно створено';
+        } else {
+            $error_message = 'Заголовок та зміст обов\'язкові';
+        }
+    }
+    
+    // Модерація коментарів
+    elseif ($action === 'comment_action' && isset($_POST['comment_id'])) {
+        $comment_id = intval($_POST['comment_id']);
+        $comment_action = $_POST['comment_action'] ?? '';
+        
+        if ($comment_action === 'approve') {
+            $stmt = $pdo->prepare("UPDATE comments SET status = 'approved' WHERE id = ?");
+            $stmt->execute([$comment_id]);
+            $success_message = 'Коментар схвалено';
+        } elseif ($comment_action === 'reject') {
+            $stmt = $pdo->prepare("UPDATE comments SET status = 'rejected' WHERE id = ?");
+            $stmt->execute([$comment_id]);
+            $success_message = 'Коментар відхилено';
+        } elseif ($comment_action === 'delete') {
+            $stmt = $pdo->prepare("DELETE FROM comments WHERE id = ?");
+            $stmt->execute([$comment_id]);
+            $success_message = 'Коментар видалено';
+        }
+    }
+    
+    // Збереження налаштувань (без MVC!)
+    elseif ($action === 'save_settings') {
+        // Завантаження логотипу
+        if (isset($_FILES['logo']) && $_FILES['logo']['error'] === UPLOAD_ERR_OK) {
+            $upload_dir = '../uploads/';
+            if (!is_dir($upload_dir)) mkdir($upload_dir, 0755, true);
+            
+            $ext = strtolower(pathinfo($_FILES['logo']['name'], PATHINFO_EXTENSION));
+            $allowed = ['jpg', 'jpeg', 'png', 'gif', 'svg', 'webp'];
+            
+            if (in_array($ext, $allowed) && $_FILES['logo']['size'] <= 5242880) { // 5MB
+                $filename = 'logo_' . time() . '.' . $ext;
+                $upload_path = $upload_dir . $filename;
+                
+                if (move_uploaded_file($_FILES['logo']['tmp_name'], $upload_path)) {
+                    $stmt = $pdo->prepare("INSERT INTO settings (`key`, `value`) VALUES ('logo_path', ?) ON DUPLICATE KEY UPDATE `value` = ?");
+                    $logo_path = '/uploads/' . $filename;
+                    $stmt->execute([$logo_path, $logo_path]);
+                }
+            }
+        }
+        
+        // Видалення логотипу
+        if (isset($_POST['delete_logo'])) {
+            $logo_path = get_setting('logo_path');
+            if ($logo_path && file_exists('..' . $logo_path)) {
+                unlink('..' . $logo_path);
+            }
+            $stmt = $pdo->prepare("DELETE FROM settings WHERE `key` = 'logo_path'");
+            $stmt->execute();
+        }
+        
+        // Збереження всіх налаштувань
+        foreach ($_POST as $key => $value) {
+            if (in_array($key, ['action', 'csrf_token', 'delete_logo'])) continue;
+            
+            // Checkbox обробка
+            if (in_array($key, ['show_logo', 'show_view_counts', 'comments_require_moderation'])) {
+                $value = isset($_POST[$key]) ? '1' : '0';
+            }
+            
+            $stmt = $pdo->prepare("INSERT INTO settings (`key`, `value`) VALUES (?, ?) ON DUPLICATE KEY UPDATE `value` = ?");
+            $stmt->execute([$key, $value, $value]);
+        }
+        
+        $success_message = 'Налаштування збережено';
+    }
+}
+
+// Активний таб
+$active_tab = $_GET['tab'] ?? 'posts';
+
+// ===== ДАНІ ДЛЯ ВКЛАДКИ ПОСТІВ =====
+$search = $_GET['search'] ?? '';
+$posts_page = max(1, intval($_GET['page'] ?? 1));
+$posts_per_page = 20;
+
+$where = [];
+$params = [];
+if ($search) {
+    $where[] = "(title LIKE ? OR content LIKE ? OR tags LIKE ?)";
+    $params = ["%$search%", "%$search%", "%$search%"];
+}
+$where_sql = $where ? 'WHERE ' . implode(' AND ', $where) : '';
+
+$stmt = $pdo->prepare("SELECT COUNT(*) FROM posts $where_sql");
+$stmt->execute($params);
+$total_posts = $stmt->fetchColumn();
+
+$offset = ($posts_page - 1) * $posts_per_page;
+$stmt = $pdo->prepare("SELECT * FROM posts $where_sql ORDER BY created_at DESC LIMIT $posts_per_page OFFSET $offset");
+$stmt->execute($params);
+$posts = $stmt->fetchAll();
+$total_posts_pages = ceil($total_posts / $posts_per_page);
+
+// ===== ДАНІ ДЛЯ ВКЛАДКИ КОМЕНТАРІВ =====
+$comment_status = $_GET['status'] ?? 'pending';
+$comments_page = max(1, intval($_GET['cpage'] ?? 1));
+$comments_per_page = 20;
+
+$stmt = $pdo->prepare("SELECT COUNT(*) FROM comments WHERE status = ?");
+$stmt->execute([$comment_status]);
+$total_comments = $stmt->fetchColumn();
+
+$offset = ($comments_page - 1) * $comments_per_page;
+$stmt = $pdo->prepare("
+    SELECT c.*, p.title as post_title 
+    FROM comments c 
+    LEFT JOIN posts p ON c.post_id = p.id 
+    WHERE c.status = ? 
+    ORDER BY c.created_at DESC 
+    LIMIT $comments_per_page OFFSET $offset
+");
+$stmt->execute([$comment_status]);
+$comments = $stmt->fetchAll();
+$total_comments_pages = ceil($total_comments / $comments_per_page);
+
+// Лічильники
+$stmt = $pdo->query("SELECT COUNT(*) FROM comments WHERE status = 'pending'");
+$pending_count = $stmt->fetchColumn();
+$stmt = $pdo->query("SELECT COUNT(*) FROM comments WHERE status = 'approved'");
+$approved_count = $stmt->fetchColumn();
+$stmt = $pdo->query("SELECT COUNT(*) FROM comments WHERE status = 'rejected'");
+$rejected_count = $stmt->fetchColumn();
+
+$pageTitle = "Адміністрування /\\ogos";
+require '../includes/templates/header.php';
+?>
+
+<style>
+.tabs {
+    display: flex;
+    gap: 5px;
+    border-bottom: 2px solid #e0e0e0;
+    margin-bottom: 30px;
+}
+.tab {
+    padding: 12px 24px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+    color: #666;
+    border-bottom: 3px solid transparent;
+    transition: all 0.2s;
+}
+.tab:hover {
+    color: #000;
+    background: #f5f5f5;
+}
+.tab.active {
+    color: #000;
+    font-weight: 600;
+    border-bottom-color: #000;
+}
+.tab-content {
+    display: none;
+}
+.tab-content.active {
+    display: block;
+}
+.quick-form {
+    background: #f9f9f9;
+    padding: 20px;
+    border-radius: 5px;
+    margin-bottom: 30px;
+}
+</style>
+
+<?php if ($success_message): ?>
+<div class="message success"><?= htmlspecialchars($success_message) ?></div>
+<?php endif; ?>
+
+<?php if ($error_message): ?>
+<div class="message error"><?= htmlspecialchars($error_message) ?></div>
+<?php endif; ?>
+
+<!-- ВКЛАДКИ -->
+<div class="tabs">
+    <button class="tab <?= $active_tab === 'posts' ? 'active' : '' ?>" onclick="switchTab('posts')">
+        <i class="fa-solid fa-file-lines"></i> Пости (<?= $total_posts ?>)
+    </button>
+    <button class="tab <?= $active_tab === 'comments' ? 'active' : '' ?>" onclick="switchTab('comments')">
+        <i class="fa-solid fa-comments"></i> Коментарі
+        <?php if ($pending_count > 0): ?>
+            <span style="background: #cc0000; color: white; padding: 2px 6px; border-radius: 10px; font-size: 12px; margin-left: 5px;"><?= $pending_count ?></span>
+        <?php endif; ?>
+    </button>
+    <button class="tab <?= $active_tab === 'settings' ? 'active' : '' ?>" onclick="switchTab('settings')">
+        <i class="fa-solid fa-gear"></i> Налаштування
+    </button>
+</div>
+
+<!-- ==================== ВКЛАДКА: ПОСТИ ==================== -->
+<div id="tab-posts" class="tab-content <?= $active_tab === 'posts' ? 'active' : '' ?>">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <h2>Управління постами</h2>
+        <a href="/admin/post-editor.php" class="button"><i class="fa-solid fa-plus"></i> Повний редактор</a>
+    </div>
+
+    <!-- Швидке додавання -->
+    <details class="quick-form">
+        <summary style="cursor: pointer; font-weight: 600; margin-bottom: 15px;"><i class="fa-solid fa-bolt"></i> Швидке додавання поста</summary>
+        <form method="POST">
+            <input type="hidden" name="action" value="quick_add_post">
+            <div class="form-group">
+                <label>Заголовок:</label>
+                <input type="text" name="title" required>
+            </div>
+            <div class="form-group">
+                <label>Зміст (Markdown):</label>
+                <textarea name="content" rows="5" required></textarea>
+            </div>
+            <div class="form-group">
+                <label>Теги (через кому):</label>
+                <input type="text" name="tags" placeholder="php, aegea, blog">
+            </div>
+            <button type="submit"><i class="fa-solid fa-paper-plane"></i> Опублікувати</button>
+        </form>
+    </details>
+
+    <!-- Пошук -->
+    <form method="GET" style="margin: 20px 0;">
+        <input type="hidden" name="tab" value="posts">
+        <input type="text" name="search" value="<?= htmlspecialchars($search) ?>" placeholder="Пошук постів..." style="width: 300px;">
+        <button type="submit"><i class="fa-solid fa-search"></i> Шукати</button>
+        <?php if ($search): ?>
+            <a href="?tab=posts"><i class="fa-solid fa-times"></i> Очистити</a>
+        <?php endif; ?>
+    </form>
+
+    <!-- Таблиця постів -->
+    <?php if (count($posts) > 0): ?>
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Заголовок</th>
+                <th>Теги</th>
+                <th>Дата</th>
+                <th>Перегляди</th>
+                <th>Дії</th>
+            </tr>
+        </thead>
+        <tbody>
+            <?php foreach ($posts as $post): ?>
+            <tr>
+                <td><?= $post['id'] ?></td>
+                <td>
+                    <a href="/post.php?id=<?= $post['id'] ?>" target="_blank"><?= htmlspecialchars($post['title']) ?></a>
+                </td>
+                <td>
+                    <?php if ($post['tags']): ?>
+                        <?php foreach (parse_tags($post['tags']) as $tag): ?>
+                            <span style="color: #666; margin-right: 5px;">#<?= htmlspecialchars($tag) ?></span>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
+                </td>
+                <td><?= date('d.m.Y H:i', strtotime($post['created_at'])) ?></td>
+                <td><?= get_post_views($post['id']) ?></td>
+                <td>
+                    <a href="/admin/post-editor.php?id=<?= $post['id'] ?>">Редагувати</a>
+                    <form method="POST" style="display: inline;" onsubmit="return confirm('Видалити цей пост?')">
+                        <input type="hidden" name="action" value="delete_post">
+                        <input type="hidden" name="post_id" value="<?= $post['id'] ?>">
+                        <button type="submit" style="background: none; border: none; color: #cc0000; cursor: pointer; text-decoration: underline;">Видалити</button>
+                    </form>
+                </td>
+            </tr>
+            <?php endforeach; ?>
+        </tbody>
+    </table>
+
+    <?php if ($total_posts_pages > 1): ?>
+    <div class="pagination">
+        <?php if ($posts_page > 1): ?>
+            <a href="?tab=posts&page=<?= $posts_page - 1 ?><?= $search ? '&search=' . urlencode($search) : '' ?>"><i class="fa-solid fa-chevron-left"></i> Попередня</a>
+        <?php endif; ?>
+        <span>Сторінка <?= $posts_page ?> з <?= $total_posts_pages ?></span>
+        <?php if ($posts_page < $total_posts_pages): ?>
+            <a href="?tab=posts&page=<?= $posts_page + 1 ?><?= $search ? '&search=' . urlencode($search) : '' ?>">Наступна <i class="fa-solid fa-chevron-right"></i></a>
+        <?php endif; ?>
+    </div>
+    <?php endif; ?>
+
+    <?php else: ?>
+    <div class="empty-state">
+        <p>Постів не знайдено</p>
+    </div>
+    <?php endif; ?>
+</div>
+
+<!-- ==================== ВКЛАДКА: КОМЕНТАРІ ==================== -->
+<div id="tab-comments" class="tab-content <?= $active_tab === 'comments' ? 'active' : '' ?>">
+    <h2>Модерація коментарів</h2>
+
+    <div style="margin: 20px 0; display: flex; gap: 10px;">
+        <a href="?tab=comments&status=pending" class="<?= $comment_status === 'pending' ? 'button' : '' ?>" style="<?= $comment_status === 'pending' ? '' : 'color: #666; text-decoration: underline;' ?>">
+            На модерації (<?= $pending_count ?>)
+        </a>
+        <a href="?tab=comments&status=approved" class="<?= $comment_status === 'approved' ? 'button' : '' ?>" style="<?= $comment_status === 'approved' ? '' : 'color: #666; text-decoration: underline;' ?>">
+            Схвалені (<?= $approved_count ?>)
+        </a>
+        <a href="?tab=comments&status=rejected" class="<?= $comment_status === 'rejected' ? 'button' : '' ?>" style="<?= $comment_status === 'rejected' ? '' : 'color: #666; text-decoration: underline;' ?>">
+            Відхилені (<?= $rejected_count ?>)
+        </a>
+    </div>
+
+    <?php if (count($comments) > 0): ?>
+    <table>
+        <thead>
+            <tr>
+                <th>Автор</th>
+                <th>Коментар</th>
+                <th>Пост</th>
+                <th>Дата</th>
+                <th>Дії</th>
+            </tr>
+        </thead>
+        <tbody>
+            <?php foreach ($comments as $comment): ?>
+            <tr>
+                <td>
+                    <strong><?= htmlspecialchars($comment['author']) ?></strong><br>
+                    <small style="color: #999;"><?= htmlspecialchars($comment['email']) ?></small>
+                </td>
+                <td style="max-width: 400px;">
+                    <?= nl2br(htmlspecialchars(mb_substr($comment['content'], 0, 200))) ?>
+                    <?php if (mb_strlen($comment['content']) > 200): ?>...<?php endif; ?>
+                </td>
+                <td>
+                    <a href="/post.php?id=<?= $comment['post_id'] ?>" target="_blank">
+                        <?= htmlspecialchars($comment['post_title']) ?>
+                    </a>
+                </td>
+                <td><?= time_ago($comment['created_at']) ?></td>
+                <td>
+                    <?php if ($comment['status'] !== 'approved'): ?>
+                        <form method="POST" style="display: inline;">
+                            <input type="hidden" name="action" value="comment_action">
+                            <input type="hidden" name="comment_id" value="<?= $comment['id'] ?>">
+                            <input type="hidden" name="comment_action" value="approve">
+                            <button type="submit" style="background: none; border: none; color: #008800; cursor: pointer; text-decoration: underline;">Схвалити</button>
+                        </form>
+                    <?php endif; ?>
+                    <?php if ($comment['status'] !== 'rejected'): ?>
+                        <form method="POST" style="display: inline;">
+                            <input type="hidden" name="action" value="comment_action">
+                            <input type="hidden" name="comment_id" value="<?= $comment['id'] ?>">
+                            <input type="hidden" name="comment_action" value="reject">
+                            <button type="submit" style="background: none; border: none; color: #cc6600; cursor: pointer; text-decoration: underline;">Відхилити</button>
+                        </form>
+                    <?php endif; ?>
+                    <form method="POST" style="display: inline;" onsubmit="return confirm('Видалити цей коментар?')">
+                        <input type="hidden" name="action" value="comment_action">
+                        <input type="hidden" name="comment_id" value="<?= $comment['id'] ?>">
+                        <input type="hidden" name="comment_action" value="delete">
+                        <button type="submit" style="background: none; border: none; color: #cc0000; cursor: pointer; text-decoration: underline;">Видалити</button>
+                    </form>
+                </td>
+            </tr>
+            <?php endforeach; ?>
+        </tbody>
+    </table>
+
+    <?php if ($total_comments_pages > 1): ?>
+    <div class="pagination">
+        <?php if ($comments_page > 1): ?>
+            <a href="?tab=comments&status=<?= $comment_status ?>&cpage=<?= $comments_page - 1 ?>"><i class="fa-solid fa-chevron-left"></i> Попередня</a>
+        <?php endif; ?>
+        <span>Сторінка <?= $comments_page ?> з <?= $total_comments_pages ?></span>
+        <?php if ($comments_page < $total_comments_pages): ?>
+            <a href="?tab=comments&status=<?= $comment_status ?>&cpage=<?= $comments_page + 1 ?>">Наступна <i class="fa-solid fa-chevron-right"></i></a>
+        <?php endif; ?>
+    </div>
+    <?php endif; ?>
+
+    <?php else: ?>
+    <div class="empty-state">
+        <p>Коментарів не знайдено</p>
+    </div>
+    <?php endif; ?>
+</div>
+
+<!-- ==================== ВКЛАДКА: НАЛАШТУВАННЯ ==================== -->
+<div id="tab-settings" class="tab-content <?= $active_tab === 'settings' ? 'active' : '' ?>">
+    <h2>Налаштування сайту</h2>
+
+    <form method="POST" enctype="multipart/form-data">
+        <input type="hidden" name="action" value="save_settings">
+        <input type="hidden" name="csrf_token" value="<?= generate_csrf_token() ?>">
+        
+        <h3>Логотип</h3>
+        <div class="form-group">
+            <?php $logo_path = get_setting('logo_path'); ?>
+            <?php if ($logo_path): ?>
+                <div style="margin-bottom: 10px;">
+                    <img src="<?= htmlspecialchars($logo_path) ?>" style="max-width: 200px; border: 1px solid #ddd; padding: 10px;">
+                </div>
+                <label>
+                    <input type="checkbox" name="delete_logo" value="1">
+                    Видалити логотип
+                </label>
+            <?php endif; ?>
+            <label>Завантажити новий логотип:</label>
+            <input type="file" name="logo" accept="image/*">
+            <small>Формати: JPG, PNG, SVG, WebP. Максимум 5MB.</small>
+        </div>
+
+        <h3>Загальні налаштування</h3>
+        <div class="form-group">
+            <label>Назва сайту:</label>
+            <input type="text" name="blog_name" value="<?= htmlspecialchars(get_setting('blog_name', '/\\ogos')) ?>" required>
+        </div>
+        
+        <div class="form-group">
+            <label>Підзаголовок:</label>
+            <input type="text" name="blog_subtitle" value="<?= htmlspecialchars(get_setting('blog_subtitle', '')) ?>">
+        </div>
+        
+        <div class="form-group">
+            <label>Автор:</label>
+            <input type="text" name="author_name" value="<?= htmlspecialchars(get_setting('author_name', 'Yaroslav')) ?>">
+        </div>
+        
+        <div class="form-group">
+            <label>Опис блогу:</label>
+            <textarea name="blog_description" rows="3"><?= htmlspecialchars(get_setting('blog_description', '')) ?></textarea>
+        </div>
+
+        <h3>Відображення</h3>
+        <div class="form-group">
+            <label>Постів на сторінку:</label>
+            <input type="number" name="posts_per_page" value="<?= intval(get_setting('posts_per_page', 10)) ?>" min="1" max="50">
+        </div>
+        
+        <div class="form-group">
+            <label>
+                <input type="checkbox" name="show_logo" value="1" <?= get_setting('show_logo', '1') === '1' ? 'checked' : '' ?>>
+                Показувати логотип
+            </label>
+        </div>
+        
+        <div class="form-group">
+            <label>
+                <input type="checkbox" name="show_view_counts" value="1" <?= get_setting('show_view_counts', '0') === '1' ? 'checked' : '' ?>>
+                Показувати лічильник переглядів
+            </label>
+        </div>
+
+        <h3>Коментарі</h3>
+        <div class="form-group">
+            <label>
+                <input type="checkbox" name="comments_require_moderation" value="1" <?= get_setting('comments_require_moderation', '1') === '1' ? 'checked' : '' ?>>
+                Коментарі потребують модерації
+            </label>
+        </div>
+        
+        <div class="form-group">
+            <label>Часовий пояс:</label>
+            <select name="timezone">
+                <?php $current_tz = get_setting('timezone', 'Europe/Kiev'); ?>
+                <option value="Europe/Kiev" <?= $current_tz === 'Europe/Kiev' ? 'selected' : '' ?>>Europe/Kiev (Україна)</option>
+                <option value="Europe/London" <?= $current_tz === 'Europe/London' ? 'selected' : '' ?>>Europe/London</option>
+                <option value="America/New_York" <?= $current_tz === 'America/New_York' ? 'selected' : '' ?>>America/New_York</option>
+            </select>
+        </div>
+        
+        <button type="submit"><i class="fa-solid fa-save"></i> Зберегти налаштування</button>
+    </form>
+</div>
+
+<script>
+function switchTab(tabName) {
+    // Приховати всі вкладки
+    document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+    document.querySelectorAll('.tab').forEach(el => el.classList.remove('active'));
+    
+    // Показати обрану
+    document.getElementById('tab-' + tabName).classList.add('active');
+    event.target.closest('.tab').classList.add('active');
+    
+    // Оновити URL без перезавантаження
+    history.pushState(null, '', '?tab=' + tabName);
+}
+</script>
+
+<?php require '../includes/templates/footer.php'; ?>

@@ -1,0 +1,132 @@
+<?php
+require_once '../includes/db.php';
+require_once '../includes/functions.php';
+
+if (!is_admin()) {
+    header("Location: /index.php");
+    exit;
+}
+
+$search = $_GET['search'] ?? '';
+$page = max(1, intval($_GET['page'] ?? 1));
+$posts_per_page = 20;
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_id'])) {
+    $delete_id = intval($_POST['delete_id']);
+    $stmt = $pdo->prepare("DELETE FROM posts WHERE id = ?");
+    $stmt->execute([$delete_id]);
+    
+    $stmt = $pdo->prepare("DELETE FROM comments WHERE post_id = ?");
+    $stmt->execute([$delete_id]);
+    
+    header("Location: /admin/admin.php?deleted=1");
+    exit;
+}
+
+$where = [];
+$params = [];
+if ($search) {
+    $where[] = "(title LIKE ? OR content LIKE ? OR tags LIKE ?)";
+    $params = ["%$search%", "%$search%", "%$search%"];
+}
+
+$where_sql = $where ? 'WHERE ' . implode(' AND ', $where) : '';
+
+$stmt = $pdo->prepare("SELECT COUNT(*) FROM posts $where_sql");
+$stmt->execute($params);
+$total = $stmt->fetchColumn();
+
+$offset = ($page - 1) * $posts_per_page;
+$stmt = $pdo->prepare("SELECT * FROM posts $where_sql ORDER BY created_at DESC LIMIT $posts_per_page OFFSET $offset");
+$stmt->execute($params);
+$posts = $stmt->fetchAll();
+
+$total_pages = ceil($total / $posts_per_page);
+
+$pageTitle = "Управління постами";
+require '../includes/templates/header.php';
+?>
+
+<div class="admin-nav">
+    <a href="/admin/admin.php" class="active"><i class="fa-solid fa-file-lines"></i> Пости</a>
+    <a href="/admin/comments.php"><i class="fa-solid fa-comments"></i> Коментарі</a>
+    <a href="/admin/settings.php"><i class="fa-solid fa-gear"></i> Налаштування</a>
+</div>
+
+<?php if (isset($_GET['deleted'])): ?>
+<div class="message success">Пост успішно видалено</div>
+<?php endif; ?>
+
+<div style="display: flex; justify-content: space-between; align-items: center; margin: 30px 0;">
+    <h2>Всі пости (<?= $total ?>)</h2>
+    <a href="/admin/post-editor.php" class="button"><i class="fa-solid fa-plus"></i> Новий пост</a>
+</div>
+
+<form method="GET" style="margin: 20px 0;">
+    <input type="text" name="search" value="<?= htmlspecialchars($search) ?>" placeholder="Пошук постів..." style="width: 300px;">
+    <button type="submit"><i class="fa-solid fa-search"></i> Шукати</button>
+    <?php if ($search): ?>
+        <a href="/admin/admin.php"><i class="fa-solid fa-times"></i> Очистити</a>
+    <?php endif; ?>
+</form>
+
+<?php if (count($posts) > 0): ?>
+<table>
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Заголовок</th>
+            <th>Теги</th>
+            <th>Дата</th>
+            <th>Перегляди</th>
+            <th>Дії</th>
+        </tr>
+    </thead>
+    <tbody>
+        <?php foreach ($posts as $post): ?>
+        <tr>
+            <td><?= $post['id'] ?></td>
+            <td>
+                <a href="/post.php?id=<?= $post['id'] ?>" target="_blank"><?= htmlspecialchars($post['title']) ?></a>
+            </td>
+            <td>
+                <?php if ($post['tags']): ?>
+                    <?php foreach (parse_tags($post['tags']) as $tag): ?>
+                        <span style="color: #666; margin-right: 5px;">#<?= htmlspecialchars($tag) ?></span>
+                    <?php endforeach; ?>
+                <?php endif; ?>
+            </td>
+            <td><?= date('d.m.Y H:i', strtotime($post['created_at'])) ?></td>
+            <td><?= get_post_views($post['id']) ?></td>
+            <td>
+                <a href="/admin/post-editor.php?id=<?= $post['id'] ?>">Редагувати</a>
+                <form method="POST" style="display: inline;" onsubmit="return confirm('Видалити цей пост?')">
+                    <input type="hidden" name="delete_id" value="<?= $post['id'] ?>">
+                    <button type="submit" style="background: none; border: none; color: #cc0000; cursor: pointer; text-decoration: underline;">Видалити</button>
+                </form>
+            </td>
+        </tr>
+        <?php endforeach; ?>
+    </tbody>
+</table>
+
+<?php if ($total_pages > 1): ?>
+<div class="pagination">
+    <?php if ($page > 1): ?>
+        <a href="?page=<?= $page - 1 ?><?= $search ? '&search=' . urlencode($search) : '' ?>"><i class="fa-solid fa-chevron-left"></i> Попередня</a>
+    <?php endif; ?>
+    <span>Сторінка <?= $page ?> з <?= $total_pages ?></span>
+    <?php if ($page < $total_pages): ?>
+        <a href="?page=<?= $page + 1 ?><?= $search ? '&search=' . urlencode($search) : '' ?>">Наступна <i class="fa-solid fa-chevron-right"></i></a>
+    <?php endif; ?>
+</div>
+<?php endif; ?>
+
+<?php else: ?>
+<div class="empty-state">
+    <p>Постів не знайдено</p>
+</div>
+<?php endif; ?>
+
+<?php require '../includes/templates/footer.php'; ?>
+
