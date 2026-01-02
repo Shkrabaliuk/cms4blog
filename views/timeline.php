@@ -5,16 +5,16 @@ require_once __DIR__ . '/../includes/csrf.php';
 $parser = new ContentParser();
 
 if (empty($posts)): ?>
-    <div class="post">
+    <div class="e2-note">
         <p class="empty-message">Поки що тут тихо...</p>
     </div>
 <?php else: ?>
     
     <!-- Навігація вгорі (новіші пости) -->
     <?php if (isset($page) && $page > 1): ?>
-        <div class="pagination pagination-top">
-            <a href="/?page=<?= $page - 1 ?>" class="pagination-link pagination-prev">
-                <i class="fas fa-arrow-up"></i>
+        <div class="pagination">
+            <a href="/?page=<?= $page - 1 ?>" class="pagination-link">
+                <span class="e2-svgi">↑</span>
                 Читати вище
             </a>
         </div>
@@ -22,24 +22,23 @@ if (empty($posts)): ?>
     
     <!-- Форма створення нового посту -->
     <?php if ($isAdmin): ?>
-        <div id="newPostForm" style="display: none;" class="post">
+        <div id="newPostForm" style="display: none;" class="e2-note">
             <h2>Новий пост</h2>
             <form method="POST" action="/admin/save_post.php">
                 <?= csrfField() ?>
                 <input type="hidden" name="redirect_url" value="/">
                 
-                <div class="form-group">
+                <div class="form-control">
                     <label>Заголовок</label>
                     <input 
                         type="text" 
                         name="title" 
                         id="new_title"
                         required
-                        class="form-input"
                     >
                 </div>
                 
-                <div class="form-group">
+                <div class="form-control">
                     <label>URL (slug)</label>
                     <input 
                         type="text" 
@@ -47,12 +46,11 @@ if (empty($posts)): ?>
                         id="new_slug"
                         required
                         pattern="[a-z0-9\-]+"
-                        class="form-input"
                     >
-                    <small class="hint-text">Тільки латиниця, цифри та дефіси</small>
+                    <small>Тільки латиниця, цифри та дефіси</small>
                 </div>
                 
-                <div class="form-group">
+                <div class="form-control">
                     <label>Контент (Neasden)</label>
                     
                     <!-- Drag & Drop зона для картинок -->
@@ -72,19 +70,18 @@ if (empty($posts)): ?>
                         name="content" 
                         required
                         rows="15"
-                        class="form-textarea"
                     ></textarea>
-                    <small class="hint-text">
+                    <small>
                         <strong>Синтаксис:</strong> # Заголовок • **жирний** • //курсив// • - список
                     </small>
                 </div>
                 
                 <div class="form-actions">
-                    <button type="submit" class="btn btn-primary">
-                        <i class="fas fa-check"></i> Створити
+                    <button type="submit" class="e2-submit-button">
+                        <span class="e2-svgi">✓</span> Створити
                     </button>
-                    <button type="button" onclick="toggleNewPostForm()" class="btn btn-secondary">
-                        <i class="fas fa-times"></i> Скасувати
+                    <button type="button" onclick="toggleNewPostForm()" class="e2-button">
+                        <span class="e2-svgi">✕</span> Скасувати
                     </button>
                 </div>
             </form>
@@ -125,27 +122,24 @@ if (empty($posts)): ?>
     
     <div id="timelineContent">
     <?php foreach ($posts as $post): ?>
-        <div class="e2-note">
+        <article class="e2-note">
             <h1>
                 <a href="/<?= htmlspecialchars($post['slug']) ?>">
                     <?= htmlspecialchars($post['title']) ?>
                 </a>
             </h1>
             
-            <div class="e2-note-text e2-text">
+            <div class="e2-text">
                 <?= $parser->parse($post['content']) ?>
             </div>
             
-            <div class="e2-band">
+            <footer class="e2-band">
                 <div class="e2-band-scrollable">
                     <nav>
                         <?php if ($isAdmin): ?>
                         <div class="band-item">
-                            <a href="/<?= htmlspecialchars($post['slug']) ?>#edit">
-                                <i class="fas fa-pen"></i> Редагувати
-                            </a>
-                        </div>
-                        <?php endif; ?>
+                        <a href="/<?= htmlspecialchars($post['slug']) ?>#edit" class="e2-button">
+                            <span class="e2-svgi">✎</span> Редагувати
                         
                         <div class="band-item">
                             <span title="<?= date('d.m.Y H:i', strtotime($post['created_at'])) ?>">
@@ -178,16 +172,16 @@ if (empty($posts)): ?>
                         <?php endforeach; ?>
                     </nav>
                 </div>
-            </div>
-        </div>
+            </footer>
+        </article>
     <?php endforeach; ?>
     
     <!-- Навігація внизу (старіші пости) -->
     <?php if (isset($page) && isset($totalPages) && $page < $totalPages): ?>
-        <div class="pagination pagination-bottom">
-            <a href="/?page=<?= $page + 1 ?>" class="pagination-link pagination-next">
+        <div class="pagination">
+            <a href="/?page=<?= $page + 1 ?>" class="pagination-link">
                 Читати нижче
-                <i class="fas fa-arrow-down"></i>
+                <span class="e2-svgi">↓</span>
             </a>
         </div>
     <?php endif; ?>

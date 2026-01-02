@@ -82,10 +82,10 @@ $blogTitle = $blogSettings['blog_title'] ?? '/\ogos';
                 <?php if ($isAdmin): ?>
                 <div class="admin-links">
                     <a href="#" onclick="toggleNewPostForm(); return false;" title="Новий пост">
-                        <i class="fas fa-plus"></i>
+                        <span class="e2-svgi">+</span>
                     </a>
                     <a href="/admin/settings.php" title="Налаштування">
-                        <i class="fas fa-cog"></i>
+                        <span class="e2-svgi">⚙</span>
                     </a>
                 </div>
                 <?php endif; ?>
@@ -94,7 +94,7 @@ $blogTitle = $blogSettings['blog_title'] ?? '/\ogos';
                     <label>
                         <input type="search" name="q" placeholder="Пошук" required />
                         <span class="e2-search-icon">
-                            <i class="fas fa-search"></i>
+                            <span class="e2-svgi">🔍</span>
                         </span>
                     </label>
                 </form>

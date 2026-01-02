@@ -9,7 +9,7 @@
     </span>
     
     <a class="e2-visual-login" href="<?= $isAdmin ? '/logout.php' : '#' ?>" <?= !$isAdmin ? 'id="loginToggle"' : '' ?>>
-        <i class="fas fa-<?= $isAdmin ? 'unlock' : 'lock' ?>"></i>
+        <span class="e2-svgi"><?= $isAdmin ? '🔓' : '🔒' ?></span>
     </a>
 </div>
 
@@ -18,18 +18,18 @@
     <div class="modal-overlay"></div>
     <div class="modal-content">
         <button class="modal-close" id="closeLoginModal">
-            <i class="fas fa-times"></i>
+            <span class="e2-svgi">✕</span>
         </button>
         
         <p class="modal-subtitle" style="margin-bottom: 24px;">Лише для адміністратора.<br>Якщо ти не він — бувай 👋</p>
         
         <div id="loginError" class="modal-error" style="display: none;">
-            <i class="fas fa-exclamation-circle"></i>
+            <span class="e2-svgi">⚠</span>
             <span id="loginErrorText"></span>
         </div>
         
         <form id="loginForm" class="modal-form">
-            <div class="form-group">
+            <div class="form-control">
                 <input 
                     type="password" 
                     id="modal-password" 
@@ -41,8 +41,8 @@
                 >
             </div>
             
-            <button type="submit" class="btn-login">
-                <i class="fas fa-unlock"></i>
+            <button type="submit" class="e2-submit-button">
+                <span class="e2-svgi">🔓</span>
                 Увійти
             </button>
         </form>

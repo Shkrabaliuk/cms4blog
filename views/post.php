@@ -9,10 +9,10 @@ if (empty($post)): ?>
 <?php else: ?>
     
     <!-- Режим перегляду -->
-    <div class="e2-note" id="postView">
+    <article class="e2-note" id="postView">
         <h1><?= htmlspecialchars($post['title']) ?></h1>
         
-        <div class="e2-note-text e2-text">
+        <div class="e2-text">
             <?= $parser->parse($post['content']) ?>
         </div>
         
@@ -24,20 +24,20 @@ if (empty($post)): ?>
         </div>
         <?php endif; ?>
         
-        <div class="e2-band">
+        <footer class="e2-band">
             <div class="e2-band-scrollable">
                 <nav>
                     <?php if ($isAdmin): ?>
                     <div class="band-item">
-                        <button onclick="toggleEditMode()">
-                            <i class="fas fa-pen"></i> Редагувати
+                        <button onclick="toggleEditMode()" class="e2-button">
+                            <span class="e2-svgi">✎</span> Редагувати
                         </button>
                     </div>
                     <?php endif; ?>
                     
                     <div class="band-item">
                         <a href="#comments">
-                            <i class="fas fa-comment"></i>
+                            <span class="e2-svgi">💬</span>
                             <?= !empty($comments) ? count($comments) : 'Коментарі' ?>
                         </a>
                     </div>
@@ -57,18 +57,18 @@ if (empty($post)): ?>
                     <?php endforeach; ?>
                 </nav>
             </div>
-        </div>
-    </div>
+        </footer>
+    </article>
     
     <!-- Режим редагування (прихований за замовчуванням) -->
     <?php if ($isAdmin): ?>
-    <div id="postEdit" style="display: none;" class="post">
+    <div id="postEdit" style="display: none;" class="e2-note">
         <form method="POST" action="/admin/save_post.php">
             <?= csrfField() ?>
             <input type="hidden" name="post_id" value="<?= $post['id'] ?>">
             <input type="hidden" name="redirect_url" value="/<?= htmlspecialchars($post['slug']) ?>">
             
-            <div class="form-group">
+            <div class="form-control">
                 <label for="edit_title">Заголовок</label>
                 <input 
                     type="text" 
@@ -76,11 +76,10 @@ if (empty($post)): ?>
                     name="title" 
                     value="<?= htmlspecialchars($post['title']) ?>"
                     required
-                    class="form-input"
                 >
             </div>
             
-            <div class="form-group">
+            <div class="form-control">
                 <label for="edit_slug">URL (slug)</label>
                 <input 
                     type="text" 
@@ -89,12 +88,11 @@ if (empty($post)): ?>
                     value="<?= htmlspecialchars($post['slug']) ?>"
                     required
                     pattern="[a-z0-9\-]+"
-                    class="form-input"
                 >
-                <small class="hint-text">Тільки латиниця, цифри та дефіси</small>
+                <small>Тільки латиниця, цифри та дефіси</small>
             </div>
             
-            <div class="form-group">
+            <div class="form-control">
                 <label for="edit_content">Контент (Neasden розмітка)</label>
                 
                 <!-- Drag & Drop зона для картинок -->
@@ -114,19 +112,18 @@ if (empty($post)): ?>
                     name="content" 
                     required
                     rows="20"
-                    class="form-textarea"
                 ><?= htmlspecialchars($post['content']) ?></textarea>
-                <small class="hint-text">
+                <small>
                     <strong>Синтаксис:</strong> # Заголовок • **жирний** • //курсив// • - список • відступ 4 пробіли для коду
                 </small>
             </div>
             
             <div class="form-actions">
-                <button type="submit" class="btn btn-primary">
-                    <i class="fas fa-save"></i> Зберегти
+                <button type="submit" class="e2-submit-button">
+                    <span class="e2-svgi">💾</span> Зберегти
                 </button>
-                <button type="button" onclick="toggleEditMode()" class="btn btn-secondary">
-                    <i class="fas fa-times"></i> Скасувати
+                <button type="button" onclick="toggleEditMode()" class="e2-button">
+                    <span class="e2-svgi">✕</span> Скасувати
                 </button>
             </div>
         </form>
@@ -157,28 +154,26 @@ if (empty($post)): ?>
     <?php endif; ?>
     
     <?php if (!empty($comments)): ?>
-        <section class="comments">
-            <h2 class="comments-heading">
-                Коментарі (<?= count($comments) ?>)
-            </h2>
+        <section class="e2-comments">
+            <h2>Коментарі (<?= count($comments) ?>)</h2>
             
             <?php foreach ($comments as $comment): ?>
-                <div class="comment <?= $comment['parent_id'] ? 'reply' : '' ?>">
-                    <div class="comment-userpic">
+                <div class="e2-comment">
+                    <div class="e2-comment-userpic-area">
                         <?php if (!empty($comment['userpic'])): ?>
                             <img src="<?= htmlspecialchars($comment['userpic']) ?>" alt="">
                         <?php endif; ?>
                     </div>
                     
-                    <div class="comment-content">
-                        <div class="comment-date">
-                            <span class="comment-author">
+                    <div class="e2-comment-content">
+                        <div class="e2-comment-date">
+                            <span class="e2-comment-author">
                                 <?= htmlspecialchars($comment['author_name']) ?>
                             </span>
                             <?= date('d.m.Y H:i', strtotime($comment['created_at'])) ?>
                         </div>
                         
-                        <div class="comment-text">
+                        <div class="e2-comment-text">
                             <?= nl2br(htmlspecialchars($comment['content'])) ?>
                         </div>
                     </div>
@@ -188,8 +183,8 @@ if (empty($post)): ?>
     <?php endif; ?>
     
     <!-- Форма додавання коментаря -->
-    <section class="comment-form-section">
-        <h3 class="comment-form-heading">
+    <section class="e2-comment-form">
+        <h3>
             <?= !empty($comments) ? 'Залишити коментар' : 'Будьте першим, хто прокоментує' ?>
         </h3>
         
@@ -197,12 +192,12 @@ if (empty($post)): ?>
             <div class="error-message"><?= htmlspecialchars($error) ?></div>
         <?php endif; ?>
         
-        <form method="POST" action="/post_comment.php" class="comment-form">
+        <form method="POST" action="/post_comment.php">
             <?= csrfField() ?>
             <input type="hidden" name="post_id" value="<?= $post['id'] ?>">
             <input type="hidden" name="redirect_url" value="/<?= htmlspecialchars($post['slug']) ?>">
             
-            <div class="form-group">
+            <div class="form-control">
                 <label for="author_name">Ім'я</label>
                 <input 
                     type="text" 
@@ -210,13 +205,12 @@ if (empty($post)): ?>
                     name="author_name" 
                     required 
                     maxlength="100"
-                    class="form-input"
                     placeholder="Ваше ім'я"
                     value="<?= htmlspecialchars($commentData['author_name'] ?? '') ?>"
                 >
             </div>
             
-            <div class="form-group">
+            <div class="form-control">
                 <label for="content">Коментар</label>
                 <textarea 
                     id="content" 
@@ -224,12 +218,11 @@ if (empty($post)): ?>
                     required 
                     maxlength="5000"
                     rows="5"
-                    class="form-textarea"
                     placeholder="Ваш коментар..."
                 ><?= htmlspecialchars($commentData['content'] ?? '') ?></textarea>
             </div>
             
-            <button type="submit" class="btn-submit">Відправити</button>
+            <button type="submit" class="e2-submit-button">Відправити</button>
         </form>
     </section>
     
