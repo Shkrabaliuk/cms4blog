@@ -29,3 +29,4 @@ error_log
 # Composer
 /vendor/
 composer.lock
+-ogos.rar

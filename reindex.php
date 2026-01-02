@@ -11,6 +11,15 @@ require_once __DIR__ . '/includes/SearchService.php';
 echo "🔍 Початок індексації постів...\n\n";
 
 try {
+    // Перевіряємо чи існують таблиці Rose Search
+    $tablesExist = $pdo->query("SHOW TABLES LIKE 'rose_toc'")->rowCount() > 0;
+    
+    if (!$tablesExist) {
+        echo "⚠️  Таблиці пошуку не знайдено. Створюю...\n";
+        require_once __DIR__ . '/init_search_tables.php';
+        echo "✅ Таблиці створено!\n\n";
+    }
+    
     $searchService = new SearchService($pdo);
     
     // Очищуємо старий індекс
