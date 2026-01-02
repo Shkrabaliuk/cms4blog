@@ -125,22 +125,22 @@ if (empty($posts)): ?>
     
     <div id="timelineContent">
     <?php foreach ($posts as $post): ?>
-        <div class="note" data-note-id="<?= $post['id'] ?>">
+        <div class="e2-note" data-note-id="<?= $post['id'] ?>" data-note-read-href="/<?= htmlspecialchars($post['slug']) ?>/read/">
             <article class="h-entry">
-                <h1 class="note-title p-name">
+                <h1 class="e2-smart-title p-name">
                     <a href="/<?= htmlspecialchars($post['slug']) ?>">
                         <?= htmlspecialchars($post['title']) ?>
                     </a>
                 </h1>
                 
-                <div class="note-text e-content">
+                <div class="e2-note-text e2-text e-content">
                     <?= $parser->parse($post['content']) ?>
                 </div>
             </article>
             
-            <div class="band band-meta-size note-meta">
-                <div class="band-scrollable">
-                    <div class="band-scrollable-inner">
+            <div class="e2-band e2-band-meta-size e2-note-meta">
+                <div class="e2-band-scrollable js-band-scrollable">
+                    <div class="js-band-scrollable-inner">
                         <nav>
                             <?php if ($isAdmin): ?>
                             <div class="band-item">
@@ -179,7 +179,7 @@ if (empty($posts)): ?>
                             <?php if (!empty($tags)): ?>
                                 <?php foreach ($tags as $tag): ?>
                                 <div class="band-item">
-                                    <a href="/tag/<?= urlencode($tag['name']) ?>" class="tag band-item-inner">
+                                    <a href="/tag/<?= urlencode($tag['name']) ?>" class="e2-tag band-item-inner">
                                         <?= htmlspecialchars($tag['name']) ?>
                                     </a>
                                 </div>
