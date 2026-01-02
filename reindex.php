@@ -24,10 +24,13 @@ try {
     
     // Очищуємо старий індекс
     echo "Очищення старого індексу...\n";
+    // Тимчасово вимикаємо перевірку зовнішніх ключів для TRUNCATE
+    $pdo->exec("SET FOREIGN_KEY_CHECKS = 0");
     $pdo->exec("TRUNCATE TABLE rose_fulltext_index");
     $pdo->exec("TRUNCATE TABLE rose_keyword_index");
-    $pdo->exec("TRUNCATE TABLE rose_toc");
     $pdo->exec("TRUNCATE TABLE rose_content");
+    $pdo->exec("TRUNCATE TABLE rose_toc");
+    $pdo->exec("SET FOREIGN_KEY_CHECKS = 1");
     
     // Індексуємо всі пости
     $count = $searchService->reindexAll();

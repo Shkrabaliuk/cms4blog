@@ -17,14 +17,18 @@ if (!empty($q)) {
     }
 }
 
-$pageTitle = $q ? "Пошук: {$q}" : "Пошук";
+// Завантажуємо назву блогу
+$stmt = $pdo->query("SELECT `value` FROM settings WHERE `key` = 'blog_title'");
+$blogTitle = $stmt->fetchColumn() ?: '/\\ogos';
+
+$pageTitle = $q ? "Пошук: {$q} — {$blogTitle}" : "Пошук — {$blogTitle}";
 ?>
 <!DOCTYPE html>
 <html lang="uk" class="dark-mode">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?= htmlspecialchars($pageTitle) ?> — /\ogos</title>
+    <title><?= htmlspecialchars($pageTitle) ?></title>
     
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css">
     <link rel="stylesheet" href="/assets/fonts/tildasans.css">

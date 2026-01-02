@@ -9,50 +9,71 @@ if (empty($post)): ?>
 <?php else: ?>
     
     <!-- Режим перегляду -->
-    <article class="post" id="postView">
-        <div class="post-meta">
-            <?= date('d.m.Y', strtotime($post['created_at'])) ?>
+    <div class="note" id="postView" data-note-id="<?= $post['id'] ?>">
+        <article class="h-entry">
+            <h1 class="note-title p-name">
+                <?= htmlspecialchars($post['title']) ?>
+            </h1>
             
-            <?php if (!empty($post['author_name'])): ?>
-                • <?= htmlspecialchars($post['author_name']) ?>
-            <?php endif; ?>
+            <div class="note-text e-content">
+                <?= $parser->parse($post['content']) ?>
+            </div>
             
-            <?php if ($isAdmin): ?>
-                <span class="admin-controls">
-                    <button onclick="toggleEditMode()" class="edit-link" title="Редагувати">
-                        <i class="fas fa-pen"></i>
-                    </button>
-                </span>
+            <?php if ($post['type'] === 'image' && !empty($post['gallery_images'])): ?>
+                <!-- Fotorama gallery for image posts -->
+                <div class="fotorama" data-nav="thumbs" data-width="100%" data-ratio="16/9">
+                    <?php foreach ($post['gallery_images'] as $img): ?>
+                        <img src="<?= htmlspecialchars($img) ?>" alt="">
+                    <?php endforeach; ?>
+                </div>
             <?php endif; ?>
-        </div>
+        </article>
         
-        <h1 class="post-title">
-            <?= htmlspecialchars($post['title']) ?>
-        </h1>
-        
-        <div class="post-content">
-            <?= $parser->parse($post['content']) ?>
-        </div>
-        
-        <?php if ($post['type'] === 'image' && !empty($post['gallery_images'])): ?>
-            <!-- Fotorama gallery for image posts -->
-            <div class="fotorama" data-nav="thumbs" data-width="100%" data-ratio="16/9">
-                <?php foreach ($post['gallery_images'] as $img): ?>
-                    <img src="<?= htmlspecialchars($img) ?>" alt="">
-                <?php endforeach; ?>
+        <div class="band band-meta-size note-meta">
+            <div class="band-scrollable">
+                <div class="band-scrollable-inner">
+                    <nav>
+                        <?php if ($isAdmin): ?>
+                        <div class="band-item">
+                            <button onclick="toggleEditMode()" class="band-item-inner" title="Редагувати">
+                                <i class="fas fa-pen"></i>
+                            </button>
+                        </div>
+                        <?php endif; ?>
+                        
+                        <div class="band-item">
+                            <a href="#comments" class="band-item-inner">
+                                <i class="fas fa-comment"></i>
+                                <?php if (!empty($comments)): ?>
+                                    <?= count($comments) ?>
+                                <?php else: ?>
+                                    Нет комментариев
+                                <?php endif; ?>
+                            </a>
+                        </div>
+                        
+                        <div class="band-item">
+                            <div class="band-item-inner">
+                                <span title="<?= date('d.m.Y H:i', strtotime($post['created_at'])) ?>">
+                                    <?= date('Y', strtotime($post['created_at'])) ?>
+                                </span>
+                            </div>
+                        </div>
+                        
+                        <?php if (!empty($tags)): ?>
+                            <?php foreach ($tags as $tag): ?>
+                            <div class="band-item">
+                                <a href="/tag/<?= urlencode($tag['name']) ?>" class="tag band-item-inner">
+                                    <?= htmlspecialchars($tag['name']) ?>
+                                </a>
+                            </div>
+                            <?php endforeach; ?>
+                        <?php endif; ?>
+                    </nav>
+                </div>
             </div>
-        <?php endif; ?>
-        
-        <?php if (!empty($tags)): ?>
-            <div class="post-tags">
-                <?php foreach ($tags as $tag): ?>
-                    <a href="/tag/<?= urlencode($tag['name']) ?>" class="tag">
-                        #<?= htmlspecialchars($tag['name']) ?>
-                    </a>
-                <?php endforeach; ?>
-            </div>
-        <?php endif; ?>
-    </article>
+        </div>
+    </div>
     
     <!-- Режим редагування (прихований за замовчуванням) -->
     <?php if ($isAdmin): ?>

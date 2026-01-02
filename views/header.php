@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?= htmlspecialchars($pageTitle ?? '/\ogos') ?></title>
+    <title><?= htmlspecialchars($pageTitle ?? $blogTitle) ?></title>
     
     <?php if (!empty($blogSettings['blog_description'])): ?>
     <meta name="description" content="<?= htmlspecialchars($blogSettings['blog_description']) ?>">
     <?php endif; ?>
     
     <!-- RSS Feed -->
-    <link rel="alternate" type="application/rss+xml" title="<?= htmlspecialchars($pageTitle ?? '/\ogos') ?> RSS Feed" href="/rss.php">
+    <link rel="alternate" type="application/rss+xml" title="<?= htmlspecialchars($blogTitle) ?> RSS Feed" href="/rss.php">
     
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css">
     
@@ -57,31 +57,84 @@ if (!isset($blogSettings)) {
 $blogTitle = $blogSettings['blog_title'] ?? '/\ogos';
 ?>
 
-<div class="container">
-    <header>
-        <div class="logo">
-            <a href="/"><?= htmlspecialchars($blogTitle) ?> <span>blog</span></a>
+<div class="common">
+    <div class="flag">
+        <div class="header-content">
+            <div class="header-description">
+                <div class="title">
+                    <div class="title-inner">
+                        <?php if (!empty($blogSettings['author_avatar'])): ?>
+                        <div class="logo-marginal">
+                            <div class="user-picture-container">
+                                <div class="user-picture-inner">
+                                    <img src="<?= htmlspecialchars($blogSettings['author_avatar']) ?>" 
+                                         class="user-picture-image" 
+                                         alt="" />
+                                </div>
+                            </div>
+                        </div>
+                        <?php endif; ?>
+                        
+                        <div class="logo">
+                            <?php if (!empty($blogSettings['author_avatar'])): ?>
+                            <div class="user-picture-container">
+                                <div class="user-picture-inner">
+                                    <img src="<?= htmlspecialchars($blogSettings['author_avatar']) ?>" 
+                                         class="user-picture-image" 
+                                         alt="" />
+                                </div>
+                            </div>
+                            <?php endif; ?>
+                        </div>
+                        
+                        <h1>
+                            <a href="/"><?= htmlspecialchars($blogTitle) ?> <span>blog</span></a>
+                        </h1>
+                    </div>
+                    
+                    <?php if (!empty($blogSettings['blog_tagline'])): ?>
+                    <div class="blog-description">
+                        <p><?= htmlspecialchars($blogSettings['blog_tagline']) ?></p>
+                    </div>
+                    <?php endif; ?>
+                </div>
+            </div>
+            
+            <div class="spotlight">
+                <span class="admin-links-floating">
+                    <span class="admin-menu admin-links">
+                        <?php if ($isAdmin): ?>
+                        <span class="admin-icon" title="Новий пост">
+                            <a href="#" onclick="toggleNewPostForm(); return false;" class="nu">
+                                <i class="fas fa-plus"></i>
+                            </a>
+                        </span>
+                        
+                        <span class="admin-icon">
+                            <a href="/admin/settings.php" class="nu" title="Налаштування">
+                                <i class="fas fa-cog"></i>
+                            </a>
+                        </span>
+                        <?php endif; ?>
+                    </span>
+                </span>
+                
+                <form class="search-box-nano" action="/search.php" method="get">
+                    <label>
+                        <input type="search" 
+                               name="q" 
+                               value="" 
+                               placeholder="Пошук" 
+                               required="required" />
+                        <span class="search-icon">
+                            <i class="fas fa-search"></i>
+                        </span>
+                    </label>
+                </form>
+            </div>
         </div>
-        
-        <div class="header-search-container">
-            <?php if ($isAdmin): ?>
-            <button type="button" class="search-toggle" onclick="toggleNewPostForm()" title="Новий пост">
-                <i class="fas fa-plus"></i>
-            </button>
-            <?php endif; ?>
-            <button type="button" class="search-toggle" id="searchToggle">
-                <i class="fas fa-search"></i>
-            </button>
-            <form method="GET" action="/search.php" class="header-search" id="headerSearch">
-                <input 
-                    type="search" 
-                    name="q" 
-                    placeholder="Пошук..."
-                    class="search-input-mini"
-                    id="searchInput"
-                >
-            </form>
-        </div>
-    </header>
+    </div>
+</div>
 
+<div class="container">
     <main>

@@ -93,11 +93,14 @@ if (empty($posts)): ?>
         <script>
             function toggleNewPostForm() {
                 const form = document.getElementById('newPostForm');
+                const timeline = document.getElementById('timelineContent');
                 if (form.style.display === 'none') {
                     form.style.display = 'block';
+                    timeline.style.display = 'none';
                     document.getElementById('new_title').focus();
                 } else {
                     form.style.display = 'none';
+                    timeline.style.display = 'block';
                 }
             }
             
@@ -120,59 +123,73 @@ if (empty($posts)): ?>
         </script>
     <?php endif; ?>
     
+    <div id="timelineContent">
     <?php foreach ($posts as $post): ?>
-        <article class="post">
-            <div class="post-meta">
-                <?= date('d.m.Y', strtotime($post['created_at'])) ?>
+        <div class="note" data-note-id="<?= $post['id'] ?>">
+            <article class="h-entry">
+                <h1 class="note-title p-name">
+                    <a href="/<?= htmlspecialchars($post['slug']) ?>">
+                        <?= htmlspecialchars($post['title']) ?>
+                    </a>
+                </h1>
                 
-                <?php if ($isAdmin): ?>
-                    <span class="admin-controls">
-                        <a href="/<?= htmlspecialchars($post['slug']) ?>#edit" class="edit-link" title="Редагувати">
-                            <i class="fas fa-pen"></i>
-                        </a>
-                    </span>
-                <?php endif; ?>
-            </div>
-            
-            <h2 class="post-title">
-                <a href="/<?= htmlspecialchars($post['slug']) ?>">
-                    <?= htmlspecialchars($post['title']) ?>
-                </a>
-            </h2>
-            
-            <div class="post-content">
-                <?= $parser->parse($post['content']) ?>
-            </div>
-            
-            <?php
-            // Завантажуємо теги для поста (якщо таблиця існує)
-            $tags = [];
-            try {
-                $stmt = $pdo->prepare("
-                    SELECT t.* 
-                    FROM tags t
-                    JOIN post_tags pt ON t.id = pt.tag_id
-                    WHERE pt.post_id = ?
-                    ORDER BY t.name
-                ");
-                $stmt->execute([$post['id']]);
-                $tags = $stmt->fetchAll();
-            } catch (PDOException $e) {
-                // Таблиця tags не існує - ігноруємо
-            }
-            ?>
-            
-            <?php if (!empty($tags)): ?>
-                <div class="post-tags">
-                    <?php foreach ($tags as $tag): ?>
-                        <a href="/tag/<?= urlencode($tag['name']) ?>" class="tag">
-                            #<?= htmlspecialchars($tag['name']) ?>
-                        </a>
-                    <?php endforeach; ?>
+                <div class="note-text e-content">
+                    <?= $parser->parse($post['content']) ?>
                 </div>
-            <?php endif; ?>
+            </article>
             
-        </article>
+            <div class="band band-meta-size note-meta">
+                <div class="band-scrollable">
+                    <div class="band-scrollable-inner">
+                        <nav>
+                            <?php if ($isAdmin): ?>
+                            <div class="band-item">
+                                <a href="/<?= htmlspecialchars($post['slug']) ?>#edit" class="band-item-inner" title="Редагувати">
+                                    <i class="fas fa-pen"></i>
+                                </a>
+                            </div>
+                            <?php endif; ?>
+                            
+                            <div class="band-item">
+                                <div class="band-item-inner">
+                                    <span title="<?= date('d.m.Y H:i', strtotime($post['created_at'])) ?>">
+                                        <?= date('Y', strtotime($post['created_at'])) ?>
+                                    </span>
+                                </div>
+                            </div>
+                            
+                            <?php
+                            // Завантажуємо теги для поста
+                            $tags = [];
+                            try {
+                                $stmt = $pdo->prepare("
+                                    SELECT t.* 
+                                    FROM tags t
+                                    JOIN post_tags pt ON t.id = pt.tag_id
+                                    WHERE pt.post_id = ?
+                                    ORDER BY t.name
+                                ");
+                                $stmt->execute([$post['id']]);
+                                $tags = $stmt->fetchAll();
+                            } catch (PDOException $e) {
+                                // Таблиця tags не існує - ігноруємо
+                            }
+                            ?>
+                            
+                            <?php if (!empty($tags)): ?>
+                                <?php foreach ($tags as $tag): ?>
+                                <div class="band-item">
+                                    <a href="/tag/<?= urlencode($tag['name']) ?>" class="tag band-item-inner">
+                                        <?= htmlspecialchars($tag['name']) ?>
+                                    </a>
+                                </div>
+                                <?php endforeach; ?>
+                            <?php endif; ?>
+                        </nav>
+                    </div>
+                </div>
+            </div>
+        </div>
     <?php endforeach; ?>
     
     <!-- Навігація внизу (старіші пости) -->
@@ -184,5 +201,6 @@ if (empty($posts)): ?>
             </a>
         </div>
     <?php endif; ?>
+    </div>
 
 <?php endif; ?>

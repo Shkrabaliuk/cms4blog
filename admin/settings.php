@@ -66,6 +66,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             // Форма налаштувань блогу
             try {
                 $blogTitle = trim($_POST['blog_title'] ?? '');
+                $blogAuthor = trim($_POST['blog_author'] ?? '');
+                $blogTagline = trim($_POST['blog_tagline'] ?? '');
+                $authorAvatar = trim($_POST['author_avatar'] ?? '');
                 $blogDescription = trim($_POST['blog_description'] ?? '');
                 $postsPerPage = (int)($_POST['posts_per_page'] ?? 5);
                 $googleAnalyticsId = trim($_POST['google_analytics_id'] ?? '');
@@ -77,11 +80,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $stmt = $pdo->prepare("INSERT INTO settings (`key`, `value`) VALUES (?, ?) ON DUPLICATE KEY UPDATE `value` = ?");
                     
                     $stmt->execute(['blog_title', $blogTitle, $blogTitle]);
+                    $stmt->execute(['blog_author', $blogAuthor, $blogAuthor]);
+                    $stmt->execute(['blog_tagline', $blogTagline, $blogTagline]);
+                    $stmt->execute(['author_avatar', $authorAvatar, $authorAvatar]);
                     $stmt->execute(['blog_description', $blogDescription, $blogDescription]);
                     $stmt->execute(['posts_per_page', $postsPerPage, $postsPerPage]);
                     $stmt->execute(['google_analytics_id', $googleAnalyticsId, $googleAnalyticsId]);
                     
                     $settings['blog_title'] = $blogTitle;
+                    $settings['blog_author'] = $blogAuthor;
+                    $settings['blog_tagline'] = $blogTagline;
+                    $settings['author_avatar'] = $authorAvatar;
                     $settings['blog_description'] = $blogDescription;
                     $settings['posts_per_page'] = $postsPerPage;
                     $settings['google_analytics_id'] = $googleAnalyticsId;
@@ -96,7 +105,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-$pageTitle = 'Налаштування';
+// Завантажуємо назву блогу для title
+$stmt = $pdo->query("SELECT `value` FROM settings WHERE `key` = 'blog_title'");
+$blogTitle = $stmt->fetchColumn() ?: '/\\ogos';
+
+$pageTitle = "Налаштування — {$blogTitle}";
 $content = '';
 ob_start();
 ?>
@@ -134,7 +147,46 @@ ob_start();
         </div>
         
         <div class="form-group">
-            <label for="blog_description">Опис блогу</label>
+            <label for="blog_author">Автор блогу</label>
+            <input 
+                type="text" 
+                id="blog_author" 
+                name="blog_author" 
+                value="<?= htmlspecialchars($settings['blog_author'] ?? '') ?>"
+                class="form-input"
+                placeholder="Ваше ім'я"
+            >
+            <small>Відображається в футері блогу</small>
+        </div>
+        
+        <div class="form-group">
+            <label for="blog_tagline">Дескрипція блогу</label>
+            <input 
+                type="text" 
+                id="blog_tagline" 
+                name="blog_tagline" 
+                value="<?= htmlspecialchars($settings['blog_tagline'] ?? '') ?>"
+                maxlength="100"
+                class="form-input"
+            >
+            <small>Короткий опис під назвою блогу (максимум 100 символів)</small>
+        </div>
+        
+        <div class="form-group">
+            <label for="author_avatar">Аватарка автора</label>
+            <input 
+                type="url" 
+                id="author_avatar" 
+                name="author_avatar" 
+                value="<?= htmlspecialchars($settings['author_avatar'] ?? '') ?>"
+                class="form-input"
+                placeholder="https://example.com/avatar.jpg"
+            >
+            <small>URL зображення аватарки автора (відображається в хедері)</small>
+        </div>
+        
+        <div class="form-group">
+            <label for="blog_description">Опис для SEO</label>
             <textarea 
                 id="blog_description" 
                 name="blog_description" 
@@ -244,7 +296,7 @@ ob_start();
         <p style="margin-bottom: 16px; color: #999;">
             Створіть backup бази даних у форматі SQL. Файл буде автоматично завантажено на ваш комп'ютер.
         </p>
-        <a href="/admin/backup.php" class="btn btn-secondary" style="display: inline-flex; align-items: center; gap: 8px;">
+        <a href="/admin/backup.php" class="btn" style="display: inline-flex; align-items: center; gap: 8px;">
             <i class="fas fa-download"></i>
             Завантажити backup БД
         </a>
@@ -319,19 +371,19 @@ ob_start();
             Швидкий доступ до системних інструментів
         </p>
         <div style="display: flex; gap: 12px; flex-wrap: wrap;">
-            <a href="/init_search_tables.php" target="_blank" class="btn btn-secondary">
+            <a href="/init_search_tables.php" target="_blank" class="btn">
                 <i class="fas fa-database"></i>
                 Створити таблиці пошуку
             </a>
-            <a href="/reindex.php" target="_blank" class="btn btn-secondary">
+            <a href="/reindex.php" target="_blank" class="btn">
                 <i class="fas fa-sync"></i>
                 Реіндексація пошуку
             </a>
-            <a href="/sitemap.php" target="_blank" class="btn btn-secondary">
+            <a href="/sitemap.php" target="_blank" class="btn">
                 <i class="fas fa-sitemap"></i>
                 Генерація Sitemap
             </a>
-            <a href="/rss.php" target="_blank" class="btn btn-secondary">
+            <a href="/rss.php" target="_blank" class="btn">
                 <i class="fas fa-rss"></i>
                 Переглянути RSS
             </a>

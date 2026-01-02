@@ -41,7 +41,12 @@ if ($path === '' || $path === 'index.php') {
     $stmt->execute([$postsPerPage, $offset]);
     $posts = $stmt->fetchAll();
 
-    $pageTitle = "/\ogos";
+    // Завантажуємо назву блогу
+    $stmt = $pdo->query("SELECT `value` FROM settings WHERE `key` = 'blog_title'");
+    $blogTitle = $stmt->fetchColumn() ?: '/\\ogos';
+    $blogTagline = $pdo->query("SELECT `value` FROM settings WHERE `key` = 'blog_tagline'")->fetchColumn();
+    
+    $pageTitle = $blogTagline ? "{$blogTitle} — {$blogTagline}" : $blogTitle;
     $childView = 'views/timeline.php';
     
     require 'views/layout.php';
@@ -89,7 +94,11 @@ if ($post) {
     unset($_SESSION['comment_error']);
     unset($_SESSION['comment_data']);
     
-    $pageTitle = $post['title'] . " — /\ogos";
+    // Завантажуємо назву блогу
+    $stmt = $pdo->query("SELECT `value` FROM settings WHERE `key` = 'blog_title'");
+    $blogTitle = $stmt->fetchColumn() ?: '/\\ogos';
+    
+    $pageTitle = $post['title'] . " — " . $blogTitle;
     $childView = 'views/post.php';
     
     require 'views/layout.php';

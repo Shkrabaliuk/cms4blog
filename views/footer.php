@@ -1,30 +1,27 @@
     </main>
 
-    <footer>
-        <div class="flex-between">
-            <div>
-                Powered by /\ogos — <?= date('Y') ?>
-            </div>
-            <div class="flex-center">
-                <a href="/rss.php" title="RSS Feed" class="inline-flex-link">
-                    <i class="fas fa-rss"></i>
-                    RSS
-                </a>
-                <?php if ($isAdmin): ?>
-                    <a href="/admin/settings.php" title="Налаштування" class="auth-icon">
-                        <i class="fas fa-cog"></i>
-                    </a>
-                    <a href="/logout.php" title="Вийти" class="auth-icon logout-link">
-                        <i class="fas fa-unlock"></i>
-                    </a>
-                <?php else: ?>
-                    <a href="#" id="loginToggle" title="Адміністрування" class="auth-icon">
-                        <i class="fas fa-lock"></i>
-                    </a>
-                <?php endif; ?>
-            </div>
+    <div class="footer">
+        © <span class="blog-author"><?= htmlspecialchars($blogSettings['blog_author'] ?? 'Автор блогу') ?></span>, <?= date('Y') ?>
+        <a class="rss-button" href="/rss.php">РСС</a>
+        
+        <div class="engine">
+            <span title="/\ogos">Рушій — <a href="https://github.com/yourusername/-ogos" class="nu"><u>/\ogos</u> <i class="fas fa-code"></i></a></span>
         </div>
-    </footer>
+        
+        <?php if (!$isAdmin): ?>
+        <a class="visual-login nu" href="#" id="loginToggle">
+            <span class="admin-link">
+                <i class="fas fa-lock"></i>
+            </span>
+        </a>
+        <?php else: ?>
+        <a class="visual-login nu" href="/logout.php" title="Вийти">
+            <span class="admin-link">
+                <i class="fas fa-unlock"></i>
+            </span>
+        </a>
+        <?php endif; ?>
+    </div>
 </div>
 
 <!-- Модальне вікно входу -->
@@ -158,38 +155,6 @@
                     loginErrorText.textContent = 'Помилка з\'єднання';
                     loginError.style.display = 'flex';
                 });
-            });
-        }
-    });
-</script>
-
-<!-- Search toggle -->
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const toggle = document.getElementById('searchToggle');
-        const search = document.getElementById('headerSearch');
-        const input = document.getElementById('searchInput');
-        
-        if (toggle && search && input) {
-            toggle.addEventListener('click', function() {
-                search.classList.toggle('active');
-                if (search.classList.contains('active')) {
-                    setTimeout(() => input.focus(), 300);
-                }
-            });
-            
-            // Закрити при кліку поза пошуком
-            document.addEventListener('click', function(e) {
-                if (!toggle.contains(e.target) && !search.contains(e.target)) {
-                    search.classList.remove('active');
-                }
-            });
-            
-            // Закрити при натисканні Escape
-            document.addEventListener('keydown', function(e) {
-                if (e.key === 'Escape') {
-                    search.classList.remove('active');
-                }
             });
         }
     });
