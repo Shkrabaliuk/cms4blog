@@ -96,13 +96,7 @@ ob_start();
 ?>
 
 <div class="settings-container">
-    <div class="settings-header">
-        <h1>Налаштування блогу</h1>
-        <a href="/" class="btn-back">
-            <i class="fas fa-arrow-left"></i>
-            На головну
-        </a>
-    </div>
+    <h1>Налаштування блогу</h1>
     
     <?php if ($success): ?>
         <div class="alert alert-success">

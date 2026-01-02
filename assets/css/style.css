@@ -574,30 +574,22 @@ footer {
 .auth-icon:hover { transform: scale(1.1); }
 
 .settings-container {
-    max-width: 680px;
-    margin: 0 auto;
-}
-
-.settings-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 32px;
-    gap: 16px;
-}
-
-.settings-header h1 {
-    font-size: 32px;
+    max-width: 100%;
     margin: 0;
+}
+
+.settings-container h1 {
+    font-size: 32px;
+    margin: 0 0 32px 0;
 }
 
 .settings-form,
 .settings-section,
 .settings-info {
-    background: var(--bg);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 32px;
+    background: transparent;
+    border: none;
+    border-radius: 0;
+    padding: 0 0 32px 0;
     margin-bottom: 32px;
 }
 

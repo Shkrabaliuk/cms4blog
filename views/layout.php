@@ -1,5 +1,5 @@
 <?php require __DIR__ . '/header.php'; ?>
 
-<?php include $childView; ?>
+<?php echo $childView; ?>
 
 <?php require __DIR__ . '/footer.php'; ?>

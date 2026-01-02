@@ -104,18 +104,12 @@
         const loginError = document.getElementById('loginError');
         const loginErrorText = document.getElementById('loginErrorText');
         
-        console.log('Login toggle element:', loginToggle);
-        console.log('Login modal element:', loginModal);
-        
         if (loginToggle) {
             loginToggle.addEventListener('click', function(e) {
                 e.preventDefault();
-                console.log('Login toggle clicked!');
                 loginModal.classList.add('active');
                 setTimeout(() => document.getElementById('modal-password').focus(), 300);
             });
-        } else {
-            console.log('loginToggle not found!');
         }
         
         if (closeModal) {
