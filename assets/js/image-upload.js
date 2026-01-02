@@ -89,7 +89,8 @@ class ImageUploader {
         for (const file of files) {
             try {
                 const result = await this.uploadFile(file);
-                this.insertMarkdown(result.markdown);
+                // Використовуємо формат Neasden замість Markdown
+                this.insertMarkdown(result.neasden || result.markdown);
             } catch (error) {
                 this.showError(`Помилка завантаження ${file.name}: ${error.message}`);
             }

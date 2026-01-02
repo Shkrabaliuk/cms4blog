@@ -20,3 +20,18 @@ spl_autoload_register(function ($class) {
         }
     }
 });
+
+/**
+ * Helper функція для Neasden - отримання розмірів зображення
+ * Обгортка для getimagesize з обробкою помилок
+ */
+if (!function_exists('e2_getimagesize')) {
+    function e2_getimagesize($filename) {
+        if (!file_exists($filename)) {
+            return false;
+        }
+        
+        $size = @getimagesize($filename);
+        return $size !== false ? $size : false;
+    }
+}

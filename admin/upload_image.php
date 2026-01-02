@@ -69,11 +69,13 @@ if (!move_uploaded_file($file['tmp_name'], $filepath)) {
 
 // Повертаємо URL для вставки в редактор
 $url = "/uploads/{$year}/{$month}/{$filename}";
-$markdown = "![{$file['name']}]({$url})";
+// Для Neasden потрібен відносний шлях від pathMedia
+$neasdenPath = "{$year}/{$month}/{$filename}";
 
 echo json_encode([
     'success' => true,
     'url' => $url,
-    'markdown' => $markdown,
+    'neasden' => $neasdenPath, // Формат для Neasden
+    'markdown' => "![{$file['name']}]({$url})", // Формат для Markdown
     'filename' => $filename
 ]);

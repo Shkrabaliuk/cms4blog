@@ -28,8 +28,9 @@ class ContentParser {
         // Налаштування для нашого CMS
         $this->configuration->language = 'uk';
         $this->configuration->baseUrl = '/';
-        $this->configuration->pathMedia = '/uploads/';
-        $this->configuration->htmlImgSrcPrefix = '';
+        // Вказуємо абсолютний шлях до uploads на сервері
+        $this->configuration->pathMedia = __DIR__ . '/../uploads/';
+        $this->configuration->htmlImgSrcPrefix = '/uploads/';
         
         // Типографіка
         $this->configuration->typographyOn = true;
