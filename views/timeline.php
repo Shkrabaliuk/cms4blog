@@ -125,68 +125,58 @@ if (empty($posts)): ?>
     
     <div id="timelineContent">
     <?php foreach ($posts as $post): ?>
-        <div class="e2-note" data-note-id="<?= $post['id'] ?>" data-note-read-href="/<?= htmlspecialchars($post['slug']) ?>/read/">
-            <article class="h-entry">
-                <h1 class="e2-smart-title p-name">
-                    <a href="/<?= htmlspecialchars($post['slug']) ?>">
-                        <?= htmlspecialchars($post['title']) ?>
-                    </a>
-                </h1>
-                
-                <div class="e2-note-text e2-text e-content">
-                    <?= $parser->parse($post['content']) ?>
-                </div>
-            </article>
+        <div class="e2-note">
+            <h1>
+                <a href="/<?= htmlspecialchars($post['slug']) ?>">
+                    <?= htmlspecialchars($post['title']) ?>
+                </a>
+            </h1>
             
-            <div class="e2-band e2-band-meta-size e2-note-meta">
-                <div class="e2-band-scrollable js-band-scrollable">
-                    <div class="js-band-scrollable-inner">
-                        <nav>
-                            <?php if ($isAdmin): ?>
-                            <div class="band-item">
-                                <a href="/<?= htmlspecialchars($post['slug']) ?>#edit" class="band-item-inner" title="Редагувати">
-                                    <i class="fas fa-pen"></i>
-                                </a>
-                            </div>
-                            <?php endif; ?>
-                            
-                            <div class="band-item">
-                                <div class="band-item-inner">
-                                    <span title="<?= date('d.m.Y H:i', strtotime($post['created_at'])) ?>">
-                                        <?= date('Y', strtotime($post['created_at'])) ?>
-                                    </span>
-                                </div>
-                            </div>
-                            
-                            <?php
-                            // Завантажуємо теги для поста
-                            $tags = [];
-                            try {
-                                $stmt = $pdo->prepare("
-                                    SELECT t.* 
-                                    FROM tags t
-                                    JOIN post_tags pt ON t.id = pt.tag_id
-                                    WHERE pt.post_id = ?
-                                    ORDER BY t.name
-                                ");
-                                $stmt->execute([$post['id']]);
-                                $tags = $stmt->fetchAll();
-                            } catch (PDOException $e) {
-                                // Таблиця tags не існує - ігноруємо
-                            }
-                            ?>
-                            
-                            <?php if (!empty($tags)): ?>
-                                <?php foreach ($tags as $tag): ?>
-                                <div class="band-item">
-                                    <a href="/tag/<?= urlencode($tag['name']) ?>" class="e2-tag band-item-inner">
-                                        <?= htmlspecialchars($tag['name']) ?>
-                                    </a>
-                                </div>
-                                <?php endforeach; ?>
-                            <?php endif; ?>
-                        </nav>
-                    </div>
+            <div class="e2-note-text e2-text">
+                <?= $parser->parse($post['content']) ?>
+            </div>
+            
+            <div class="e2-band">
+                <div class="e2-band-scrollable">
+                    <nav>
+                        <?php if ($isAdmin): ?>
+                        <div class="band-item">
+                            <a href="/<?= htmlspecialchars($post['slug']) ?>#edit">
+                                <i class="fas fa-pen"></i> Редагувати
+                            </a>
+                        </div>
+                        <?php endif; ?>
+                        
+                        <div class="band-item">
+                            <span title="<?= date('d.m.Y H:i', strtotime($post['created_at'])) ?>">
+                                <?= date('Y', strtotime($post['created_at'])) ?>
+                            </span>
+                        </div>
+                        
+                        <?php
+                        // Завантажуємо теги
+                        $tags = [];
+                        try {
+                            $stmt = $pdo->prepare("
+                                SELECT t.* 
+                                FROM tags t
+                                JOIN post_tags pt ON t.id = pt.tag_id
+                                WHERE pt.post_id = ?
+                                ORDER BY t.name
+                            ");
+                            $stmt->execute([$post['id']]);
+                            $tags = $stmt->fetchAll();
+                        } catch (PDOException $e) {}
+                        ?>
+                        
+                        <?php foreach ($tags as $tag): ?>
+                        <div class="band-item">
+                            <a href="/tag/<?= urlencode($tag['name']) ?>" class="e2-tag">
+                                <?= htmlspecialchars($tag['name']) ?>
+                            </a>
+                        </div>
+                        <?php endforeach; ?>
+                    </nav>
                 </div>
             </div>
         </div>

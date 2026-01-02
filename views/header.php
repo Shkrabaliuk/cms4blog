@@ -60,73 +60,40 @@ $blogTitle = $blogSettings['blog_title'] ?? '/\ogos';
 <div class="common">
     <div class="flag">
         <div class="header-content">
-            <div class="header-description">
-                <div class="title">
-                    <div class="title-inner">
-                        <?php if (!empty($blogSettings['author_avatar'])): ?>
-                        <div class="logo-marginal">
-                            <div class="user-picture-container">
-                                <div class="user-picture-inner">
-                                    <img src="<?= htmlspecialchars($blogSettings['author_avatar']) ?>" 
-                                         class="user-picture-image" 
-                                         alt="" />
-                                </div>
-                            </div>
-                        </div>
-                        <?php endif; ?>
-                        
-                        <div class="logo">
-                            <?php if (!empty($blogSettings['author_avatar'])): ?>
-                            <div class="user-picture-container">
-                                <div class="user-picture-inner">
-                                    <img src="<?= htmlspecialchars($blogSettings['author_avatar']) ?>" 
-                                         class="user-picture-image" 
-                                         alt="" />
-                                </div>
-                            </div>
-                            <?php endif; ?>
-                        </div>
-                        
-                        <h1>
-                            <a href="/"><?= htmlspecialchars($blogTitle) ?> <span>blog</span></a>
-                        </h1>
-                    </div>
-                    
-                    <?php if (!empty($blogSettings['blog_tagline'])): ?>
-                    <div class="blog-description">
-                        <p><?= htmlspecialchars($blogSettings['blog_tagline']) ?></p>
+            <div class="title">
+                <div class="title-inner">
+                    <?php if (!empty($blogSettings['author_avatar'])): ?>
+                    <div class="logo">
+                        <img src="<?= htmlspecialchars($blogSettings['author_avatar']) ?>" alt="" />
                     </div>
                     <?php endif; ?>
+                    
+                    <h1>
+                        <a href="/"><?= htmlspecialchars($blogTitle) ?></a>
+                    </h1>
                 </div>
+                
+                <?php if (!empty($blogSettings['blog_tagline'])): ?>
+                <p><?= htmlspecialchars($blogSettings['blog_tagline']) ?></p>
+                <?php endif; ?>
             </div>
             
             <div class="spotlight">
-                <span class="admin-links-floating">
-                    <span class="admin-menu admin-links">
-                        <?php if ($isAdmin): ?>
-                        <span class="admin-icon" title="Новий пост">
-                            <a href="#" onclick="toggleNewPostForm(); return false;" class="nu">
-                                <i class="fas fa-plus"></i>
-                            </a>
-                        </span>
-                        
-                        <span class="admin-icon">
-                            <a href="/admin/settings.php" class="nu" title="Налаштування">
-                                <i class="fas fa-cog"></i>
-                            </a>
-                        </span>
-                        <?php endif; ?>
-                    </span>
-                </span>
+                <?php if ($isAdmin): ?>
+                <div class="admin-links">
+                    <a href="#" onclick="toggleNewPostForm(); return false;" title="Новий пост">
+                        <i class="fas fa-plus"></i>
+                    </a>
+                    <a href="/admin/settings.php" title="Налаштування">
+                        <i class="fas fa-cog"></i>
+                    </a>
+                </div>
+                <?php endif; ?>
                 
-                <form class="search-box-nano" action="/search.php" method="get">
+                <form class="e2-search-box-nano" action="/search.php" method="get">
                     <label>
-                        <input type="search" 
-                               name="q" 
-                               value="" 
-                               placeholder="Пошук" 
-                               required="required" />
-                        <span class="search-icon">
+                        <input type="search" name="q" placeholder="Пошук" required />
+                        <span class="e2-search-icon">
                             <i class="fas fa-search"></i>
                         </span>
                     </label>
@@ -134,7 +101,5 @@ $blogTitle = $blogSettings['blog_title'] ?? '/\ogos';
             </div>
         </div>
     </div>
-</div>
 
-<div class="container">
-    <main>
+<main class="content">

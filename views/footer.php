@@ -1,27 +1,16 @@
-    </main>
+</main>
 
-    <div class="footer">
-        © <span class="blog-author"><?= htmlspecialchars($blogSettings['blog_author'] ?? 'Автор блогу') ?></span>, <?= date('Y') ?>
-        <a class="rss-button" href="/rss.php">РСС</a>
-        
-        <div class="engine">
-            <span title="/\ogos">Рушій — <a href="https://github.com/yourusername/-ogos" class="nu"><u>/\ogos</u> <i class="fas fa-code"></i></a></span>
-        </div>
-        
-        <?php if (!$isAdmin): ?>
-        <a class="visual-login nu" href="#" id="loginToggle">
-            <span class="admin-link">
-                <i class="fas fa-lock"></i>
-            </span>
-        </a>
-        <?php else: ?>
-        <a class="visual-login nu" href="/logout.php" title="Вийти">
-            <span class="admin-link">
-                <i class="fas fa-unlock"></i>
-            </span>
-        </a>
-        <?php endif; ?>
-    </div>
+<div class="footer common">
+    © <span class="blog-author"><?= htmlspecialchars($blogSettings['blog_author'] ?? 'Автор') ?></span>, <?= date('Y') ?>
+    <a class="e2-rss-button" href="/rss.php">РСС</a>
+    
+    <span class="engine">
+        <a href="https://github.com/yourusername/-ogos">/\ogos</a>
+    </span>
+    
+    <a class="e2-visual-login" href="<?= $isAdmin ? '/logout.php' : '#' ?>" <?= !$isAdmin ? 'id="loginToggle"' : '' ?>>
+        <i class="fas fa-<?= $isAdmin ? 'unlock' : 'lock' ?>"></i>
+    </a>
 </div>
 
 <!-- Модальне вікно входу -->

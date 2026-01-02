@@ -9,68 +9,53 @@ if (empty($post)): ?>
 <?php else: ?>
     
     <!-- Режим перегляду -->
-    <div class="e2-note" id="postView" data-note-id="<?= $post['id'] ?>" data-note-read-href="/<?= htmlspecialchars($post['slug']) ?>/read/">
-        <article class="h-entry">
-            <h1 class="e2-smart-title p-name">
-                <?= htmlspecialchars($post['title']) ?>
-            </h1>
-            
-            <div class="e2-note-text e2-text e-content">
-                <?= $parser->parse($post['content']) ?>
-            </div>
-            
-            <?php if ($post['type'] === 'image' && !empty($post['gallery_images'])): ?>
-                <!-- Fotorama gallery for image posts -->
-                <div class="fotorama" data-nav="thumbs" data-width="100%" data-ratio="16/9">
-                    <?php foreach ($post['gallery_images'] as $img): ?>
-                        <img src="<?= htmlspecialchars($img) ?>" alt="">
-                    <?php endforeach; ?>
-                </div>
-            <?php endif; ?>
-        </article>
+    <div class="e2-note" id="postView">
+        <h1><?= htmlspecialchars($post['title']) ?></h1>
         
-        <div class="e2-band e2-band-meta-size e2-note-meta">
-            <div class="e2-band-scrollable js-band-scrollable">
-                <div class="js-band-scrollable-inner">
-                    <nav>
-                        <?php if ($isAdmin): ?>
-                        <div class="band-item">
-                            <button onclick="toggleEditMode()" class="band-item-inner" title="Редагувати">
-                                <i class="fas fa-pen"></i>
-                            </button>
-                        </div>
-                        <?php endif; ?>
-                        
-                        <div class="band-item">
-                            <a href="#comments" class="band-item-inner">
-                                <i class="fas fa-comment"></i>
-                                <?php if (!empty($comments)): ?>
-                                    <?= count($comments) ?>
-                                <?php else: ?>
-                                    Нет комментариев
-                                <?php endif; ?>
-                            </a>
-                        </div>
-                        
-                        <div class="band-item">
-                            <div class="band-item-inner">
-                                <span title="<?= date('d.m.Y H:i', strtotime($post['created_at'])) ?>">
-                                    <?= date('Y', strtotime($post['created_at'])) ?>
-                                </span>
-                            </div>
-                        </div>
-                        
-                        <?php if (!empty($tags)): ?>
-                            <?php foreach ($tags as $tag): ?>
-                            <div class="band-item">
-                                <a href="/tag/<?= urlencode($tag['name']) ?>" class="e2-tag band-item-inner">
-                                    <?= htmlspecialchars($tag['name']) ?>
-                                </a>
-                            </div>
-                            <?php endforeach; ?>
-                        <?php endif; ?>
-                    </nav>
-                </div>
+        <div class="e2-note-text e2-text">
+            <?= $parser->parse($post['content']) ?>
+        </div>
+        
+        <?php if ($post['type'] === 'image' && !empty($post['gallery_images'])): ?>
+        <div class="fotorama" data-nav="thumbs" data-width="100%" data-ratio="16/9">
+            <?php foreach ($post['gallery_images'] as $img): ?>
+                <img src="<?= htmlspecialchars($img) ?>" alt="">
+            <?php endforeach; ?>
+        </div>
+        <?php endif; ?>
+        
+        <div class="e2-band">
+            <div class="e2-band-scrollable">
+                <nav>
+                    <?php if ($isAdmin): ?>
+                    <div class="band-item">
+                        <button onclick="toggleEditMode()">
+                            <i class="fas fa-pen"></i> Редагувати
+                        </button>
+                    </div>
+                    <?php endif; ?>
+                    
+                    <div class="band-item">
+                        <a href="#comments">
+                            <i class="fas fa-comment"></i>
+                            <?= !empty($comments) ? count($comments) : 'Коментарі' ?>
+                        </a>
+                    </div>
+                    
+                    <div class="band-item">
+                        <span title="<?= date('d.m.Y H:i', strtotime($post['created_at'])) ?>">
+                            <?= date('Y', strtotime($post['created_at'])) ?>
+                        </span>
+                    </div>
+                    
+                    <?php foreach ($tags as $tag): ?>
+                    <div class="band-item">
+                        <a href="/tag/<?= urlencode($tag['name']) ?>" class="e2-tag">
+                            <?= htmlspecialchars($tag['name']) ?>
+                        </a>
+                    </div>
+                    <?php endforeach; ?>
+                </nav>
             </div>
         </div>
     </div>
