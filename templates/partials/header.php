@@ -29,8 +29,8 @@ $blogTitle = $blogSettings['site_title'] ?? '/\\ogos';
     $seoDesc = htmlspecialchars(!empty($post) && !empty($post['content'])
         ? mb_substr(strip_tags($post['content']), 0, 160) . '...'
         : ($blogSettings['site_description'] ?? ''));
-    $seoImage = !empty($settings['author_avatar'])
-        ? (strpos($settings['author_avatar'], 'http') === 0 ? $settings['author_avatar'] : "https://$_SERVER[HTTP_HOST]" . $settings['author_avatar'])
+    $seoImage = !empty($blogSettings['author_avatar'])
+        ? (strpos($blogSettings['author_avatar'], 'http') === 0 ? $blogSettings['author_avatar'] : "https://$_SERVER[HTTP_HOST]" . $blogSettings['author_avatar'])
         : ""; // Fallback image if needed
     
     // Determine type

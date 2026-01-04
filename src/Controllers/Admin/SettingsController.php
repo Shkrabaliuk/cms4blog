@@ -21,6 +21,24 @@ class SettingsController
 
     public function index()
     {
+        // Get all settings
+        $stmt = $this->pdo->query("SELECT `key`, `value` FROM settings");
+        $settings = [];
+        while ($row = $stmt->fetch(\PDO::FETCH_ASSOC)) {
+            $settings[$row['key']] = $row['value'];
+        }
+
+        // Get blog settings for header
+        $blogSettings = $settings;
+        $blogTitle = $settings['site_title'] ?? 'Settings';
+        $pageTitle = 'Налаштування';
+        $isAdmin = true;
+
+        // Get success/error messages
+        $success = $_SESSION['settings_success'] ?? null;
+        $error = $_SESSION['settings_error'] ?? null;
+        unset($_SESSION['settings_success'], $_SESSION['settings_error']);
+
         require __DIR__ . '/../../../templates/pages/admin_settings.php';
     }
 

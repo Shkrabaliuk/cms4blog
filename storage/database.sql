@@ -36,12 +36,15 @@ CREATE TABLE IF NOT EXISTS `posts` (
 CREATE TABLE IF NOT EXISTS `comments` (
   `id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT,
   `post_id` int(11) UNSIGNED NOT NULL,
+  `parent_id` int(11) UNSIGNED NULL,
   `author_name` varchar(100) NOT NULL,
   `content` text NOT NULL,
   `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   KEY `post_id` (`post_id`),
-  CONSTRAINT `fk_comments_post` FOREIGN KEY (`post_id`) REFERENCES `posts` (`id`) ON DELETE CASCADE
+  KEY `parent_id` (`parent_id`),
+  CONSTRAINT `fk_comments_post` FOREIGN KEY (`post_id`) REFERENCES `posts` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `fk_comments_parent` FOREIGN KEY (`parent_id`) REFERENCES `comments` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- 4. Settings Table

@@ -1,6 +1,6 @@
 <div class="about-container">
     <h1>
-        <?= htmlspecialchars($blogSettings['site_title'] ?? '/\ogos') ?>
+        <?= htmlspecialchars($blogSettings['site_title'] ?? '/\\ogos') ?>
     </h1>
 
     <div class="about-content">
