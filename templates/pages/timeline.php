@@ -37,7 +37,9 @@ if (empty($posts)): ?>
 
             <footer>
                 <p class="post-meta">
-                    <?= date('d.m.Y', strtotime($post['created_at'])) ?>
+                    <time datetime="<?= date('Y-m-d', strtotime($post['created_at'])) ?>">
+                        <?= date('d.m.Y', strtotime($post['created_at'])) ?>
+                    </time>
 
                     <?php
                     // Get comment count
