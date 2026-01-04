@@ -1,55 +1,115 @@
-/* ==========================================
-   BASE.CSS - Simple.css inspired utilities
-   Forms, buttons, inputs, typography basics
-   ========================================== */
+/* ================================
+   NECTAR.CSS - Classless CSS Framework
+   ================================ */
 
-/* === FONTS === */
-@font-face {
-    font-family: 'TildaSans';
-    src: url('../fonts/TildaSans-Regular/TildaSans-Regular.woff2') format('woff2'),
-        url('../fonts/TildaSans-Regular/TildaSans-Regular.woff') format('woff');
-    font-weight: 400;
-    font-style: normal;
-    font-display: swap;
+:root {
+    /* === VARIABLES FROM SOURCE === */
+    --backgroundColor: #fff;
+    --backgroundTransparentColor: rgba(255, 255, 255, 0.8);
+    --sheetBackgroundColor: rgba(240, 240, 240, 0.8);
+    --foregroundColor: #000;
+    --text-color: var(--foregroundColor);
+    /* Alias for compatibility */
+    --thinRuleColor: rgba(0, 0, 0, 0.15);
+    --headingsColor: #000;
+    --headingsUnderlineColor: rgba(0, 0, 0, 0.15);
+    --boldColor: #000;
+    --linkColor: #0060a0;
+    --linkUnderlineColor: rgba(0, 96, 160, 0.15);
+    --linkColorVisited: #70a0b0;
+    --linkUnderlineColorVisited: rgba(112, 160, 176, 0.15);
+    --hoverColor: #b03000;
+    --hoverUnderlineColor: rgba(176, 48, 0, 0.15);
+    --code-bg: #f8f8f8;
+    --markedTextBackground: #fffada;
+    --inputBackgroundColor: #f0f0f0;
+    --inputTextColor: #000;
+    --imageBorderColor: #e8e8e8;
+    --button-bg-start: #f8f8f8;
+    --button-bg-end: #f0f0f0;
+    --submit-bg-start: #f88850;
+    --submit-bg-end: #d86830;
+    --submit-text: #fff;
+
+    /* Additional semantic colors */
+    --mutedColor: #999;
+    --subtleColor: #777;
+    --lightGray: #eee;
+    --borderGray: #ddd;
+    --placeholderGray: #ccc;
+    --darkGray: #666;
+    --textMuted: #555;
+    --errorColor: #d00;
+    --errorBg: #fff5f5;
+    --successColor: #2e7d32;
+    --successColorHover: #1b5e20;
+    --rssOrange: #ff6600;
+    --infoBg: #f9f9f9;
+    --subtleBorder: rgba(0, 0, 0, 0.1);
+
+    /* Fonts & Sizes */
+    --mainFontFamily: system-ui, -apple-system, BlinkMacSystemFont, "SF UI Text", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    --monoFontFamily: "Consolas", "Courier New", monospace;
+    --borderRadius: 6px;
+    --maxWidth: 1024px;
+    /* Трохи зменшив для кращого читання тексту */
+    --baseFontSize: 17px;
+    --lineHeight: 1.55;
+
+    /* Spacing */
+    --space-md: 1.5rem;
+    --space-lg: 3rem;
+
+    /* Animation */
+    --time: .2s;
 }
 
-@font-face {
-    font-family: 'TildaSans';
-    src: url('../fonts/TildaSans-Medium/TildaSans-Medium.woff2') format('woff2'),
-        url('../fonts/TildaSans-Medium/TildaSans-Medium.woff') format('woff');
-    font-weight: 500;
-    font-style: normal;
-    font-display: swap;
+/* === DARK THEME OVERRIDES === */
+/* Вмикається класом .dark-theme */
+:root.dark-theme {
+    --backgroundColor: rgb(32, 32, 32);
+    --backgroundTransparentColor: rgba(32, 32, 32, .8);
+    --sheetBackgroundColor: rgba(40, 40, 40, .8);
+    --foregroundColor: rgb(192, 192, 192);
+    --thinRuleColor: rgba(192, 192, 192, .25);
+    --headingsColor: rgb(255, 255, 255);
+    --headingsUnderlineColor: rgba(255, 255, 255, .25);
+    --boldColor: var(--foregroundColor);
+    --linkColor: rgb(0, 128, 212);
+    --linkUnderlineColor: rgba(0, 128, 212, .25);
+    --linkColorVisited: rgb(64, 96, 144);
+    --linkUnderlineColorVisited: rgba(64, 96, 144, .25);
+    --hoverColor: rgb(240, 64, 32);
+    --hoverUnderlineColor: rgba(240, 64, 32, .25);
+    --code-bg: #2a2a2a;
+    --markedTextBackground: #443300;
+    --inputBackgroundColor: #404040;
+    --inputTextColor: var(--foregroundColor);
+    --imageBorderColor: #404040;
+    --button-bg-start: #4a4a4a;
+    --button-bg-end: #3a3a3a;
 }
 
-@font-face {
-    font-family: 'TildaSans';
-    src: url('../fonts/TildaSans-Bold/TildaSans-Bold.woff2') format('woff2'),
-        url('../fonts/TildaSans-Bold/TildaSans-Bold.woff') format('woff');
-    font-weight: 700;
-    font-style: normal;
-    font-display: swap;
-}
-
-/* === RESET === */
-* {
-    margin: 0;
-    padding: 0;
+/* === RESET & BASE === */
+*,
+*::before,
+*::after {
     box-sizing: border-box;
 }
 
-html {
-    font-size: 18px;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-}
-
 body {
-    font-family: 'TildaSans', -apple-system, BlinkMacSystemFont, sans-serif;
-    font-weight: 400;
-    line-height: 1.6;
-    color: #111;
-    background: #fff;
+    margin: 0 auto;
+    padding: var(--space-lg) 20px;
+    max-width: var(--maxWidth);
+    background: var(--backgroundColor);
+    color: var(--foregroundColor);
+    font-family: var(--mainFontFamily);
+    font-size: var(--baseFontSize);
+    line-height: var(--lineHeight);
+    text-align: left;
+    min-height: 100dvh;
+    display: flex;
+    flex-direction: column;
 }
 
 /* === TYPOGRAPHY === */
@@ -59,360 +119,276 @@ h3,
 h4,
 h5,
 h6 {
-    font-family: 'TildaSans', sans-serif;
-    font-weight: 700;
+    color: var(--headingsColor);
+    font-weight: bold;
+    margin-top: 2em;
+    margin-bottom: 0.5em;
     line-height: 1.2;
-    color: #000;
-    margin-top: 2rem;
-    margin-bottom: 1rem;
+}
+
+h1:first-child {
+    margin-top: 0;
 }
 
 h1 {
-    font-size: 2rem;
-    letter-spacing: -0.02em;
+    font-size: 2.25em;
+    letter-spacing: -0.5px;
 }
 
 h2 {
-    font-size: 1.5rem;
+    font-size: 1.75em;
 }
 
 h3 {
-    font-size: 1.2rem;
+    font-size: 1.35em;
 }
 
 h4 {
-    font-size: 1.1rem;
+    font-size: 1.15em;
 }
 
-h5 {
-    font-size: 1rem;
+p,
+ul,
+ol,
+dl,
+table,
+blockquote,
+pre,
+form {
+    margin-bottom: var(--space-md);
+    max-width: 760px;
+    /* Оптимальна ширина для читання */
 }
 
-h6 {
-    font-size: 0.95rem;
-}
-
-p {
-    margin-bottom: 1.2rem;
-}
-
-/* === LINKS === */
+/* Specific Link Style from Source */
 a {
-    color: #d00;
+    color: var(--linkColor);
     text-decoration: none;
-    transition: color 0.2s;
+    border-bottom: 1px solid var(--linkUnderlineColor);
+    transition: border-color var(--time) ease-out, color var(--time) ease-out;
+}
+
+a:visited {
+    color: var(--linkColorVisited);
+    border-color: var(--linkUnderlineColorVisited);
 }
 
 a:hover {
-    color: #a00;
+    color: var(--hoverColor);
+    border-color: var(--hoverUnderlineColor);
+    transition: none;
+}
+
+b,
+strong {
+    color: var(--boldColor);
+    font-weight: bold;
+}
+
+small {
+    font-size: 0.85em;
+}
+
+/* === LISTS === */
+ul,
+ol {
+    padding-left: 20px;
+}
+
+li {
+    margin-bottom: 0.25em;
+}
+
+ul li {
+    list-style-type: disc;
+}
+
+/* === CODE === */
+pre,
+code,
+kbd,
+samp {
+    font-family: var(--monoFontFamily);
+}
+
+code {
+    background: var(--inputBackgroundColor);
+    /* Використовуємо фон інпутів для інлайн коду */
+    padding: 0.1em 0.3em;
+    border-radius: 3px;
+    font-size: 0.9em;
+}
+
+pre {
+    background: var(--code-bg);
+    padding: 15px;
+    overflow-x: auto;
+    border-radius: var(--borderRadius);
+}
+
+pre code {
+    background: none;
+    padding: 0;
+    color: inherit;
+}
+
+/* === BLOCKQUOTE === */
+blockquote {
+    border-left: 2px solid var(--foregroundColor);
+    padding-left: 20px;
+    margin-left: 0;
+    font-style: italic;
+    color: var(--headingsColor);
 }
 
 /* === FORMS === */
 input,
 textarea,
 select {
-    font-family: 'TildaSans', sans-serif;
-    font-size: 1rem;
-    background: transparent;
-    border: none;
-    border-bottom: 1px solid #ddd;
-    padding: 0.5rem 0;
+    display: block;
     width: 100%;
-    transition: border-color 0.2s, background 0.2s;
+    max-width: 480px;
+    padding: 8px 12px;
+    font-family: inherit;
+    font-size: inherit;
+    border: none;
+    background: var(--inputBackgroundColor);
+    color: var(--inputTextColor);
+    border-radius: var(--borderRadius);
+    transition: background var(--time);
+    margin-bottom: 1em;
 }
 
 input:focus,
 textarea:focus,
 select:focus {
     outline: none;
-    border-bottom-color: #000;
-    background: #fffef0;
-}
-
-input[type="search"] {
-    width: auto;
-    min-width: 150px;
-}
-
-input[type="checkbox"],
-input[type="radio"] {
-    width: auto;
-    margin-right: 0.5rem;
-}
-
-textarea {
-    min-height: 150px;
-    resize: vertical;
-    border: 1px solid #ddd;
-    padding: 0.5rem;
-}
-
-select {
-    cursor: pointer;
-    padding-right: 1.5rem;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23333' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
-    background-repeat: no-repeat;
-    background-position: right 0.5rem center;
+    box-shadow: inset 0 0 0 1px var(--linkColor);
 }
 
 label {
     display: block;
-    margin-bottom: 1.5rem;
-    font-size: 0.9rem;
-    font-weight: 500;
+    font-weight: bold;
+    margin-bottom: 0.4em;
+    color: var(--headingsColor);
 }
 
-label small {
-    display: block;
-    color: #999;
-    margin-top: 0.3rem;
-    font-size: 0.85rem;
-    font-weight: 400;
+/* Checkboxes & Radios */
+input[type="checkbox"],
+input[type="radio"] {
+    display: inline-block;
+    width: auto;
+    margin-right: 0.5em;
+    margin-bottom: 0;
 }
 
-/* === BUTTONS === */
+/* Buttons (Based on .e2-button style) */
 button,
 input[type="submit"],
-input[type="button"],
 input[type="reset"],
-.btn {
-    font-family: 'TildaSans', sans-serif;
-    font-size: 0.95rem;
-    font-weight: 500;
-    background: #f5f5f5;
-    color: #000;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    padding: 0.5rem 1rem;
-    cursor: pointer;
-    transition: all 0.2s;
+input[type="button"] {
     display: inline-block;
+    width: auto;
+    padding: 8px 20px;
+    font-size: 1rem;
+    font-weight: normal;
+    background: linear-gradient(to bottom, var(--button-bg-start) 0%, var(--button-bg-end) 100%);
+    color: var(--foregroundColor);
+    border: none;
+    border-radius: var(--borderRadius);
+    cursor: pointer;
+    box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.1);
+    margin-right: 10px;
 }
 
 button:hover,
+input[type="submit"]:hover {
+    box-shadow: inset 0 0 100px rgba(0, 0, 0, 0.05), inset 0 0 0 1px rgba(0, 0, 0, 0.2);
+}
+
+/* Primary Button Style (like .e2-submit-button) */
+input[type="submit"],
+button[type="submit"],
+button.primary {
+    background: linear-gradient(to bottom, var(--submit-bg-start) 0%, var(--submit-bg-end) 100%);
+    color: var(--submit-text);
+    font-weight: bold;
+    box-shadow: none;
+}
+
 input[type="submit"]:hover,
-input[type="button"]:hover,
-.btn:hover {
-    background: #e8e8e8;
-    border-color: #ccc;
+button[type="submit"]:hover {
+    box-shadow: inset 0 0 100px rgba(0, 0, 0, 0.1);
 }
 
-button:active,
-input[type="submit"]:active {
-    transform: translateY(1px);
-}
-
-button:disabled,
-input[type="submit"]:disabled {
+button:disabled {
     opacity: 0.5;
     cursor: not-allowed;
 }
 
-.btn-primary {
-    background: #d00;
-    color: #fff;
-    border-color: #d00;
-}
-
-.btn-primary:hover {
-    background: #a00;
-    border-color: #a00;
-}
-
 /* === TABLES === */
 table {
-    width: 100%;
     border-collapse: collapse;
-    margin: 1.5rem 0;
+    width: 100%;
+    border-spacing: 0;
 }
 
 th,
 td {
+    padding: 8px 12px 8px 0;
+    /* Align left cleanly */
     text-align: left;
-    padding: 0.75rem;
-    border-bottom: 1px solid #e0e0e0;
+    border-bottom: 1px solid var(--thinRuleColor);
 }
 
 th {
-    font-weight: 600;
-    background: #f8f8f8;
+    font-weight: bold;
+    color: var(--headingsColor);
 }
 
-/* === CODE === */
-code {
-    font-family: 'SF Mono', 'Monaco', 'Consolas', monospace;
-    font-size: 0.9em;
-    background: #f5f5f5;
-    padding: 0.2em 0.4em;
-    border-radius: 3px;
-}
-
-pre {
-    background: #f8f8f8;
-    border-left: 3px solid #d00;
-    padding: 1rem;
-    overflow-x: auto;
-    margin: 1.5rem 0;
-    border-radius: 4px;
-}
-
-pre code {
-    background: none;
-    padding: 0;
-}
-
-/* === LISTS === */
-ul,
-ol {
-    margin-bottom: 1.2rem;
-    padding-left: 1.5rem;
-}
-
-li {
-    margin-bottom: 0.5rem;
-}
-
-/* === BLOCKQUOTES === */
-blockquote {
-    border-left: 3px solid #ddd;
-    padding-left: 1rem;
-    margin: 1.5rem 0;
-    color: #666;
-    font-style: italic;
-}
-
-/* === IMAGES === */
-img {
+/* === IMAGES & MEDIA === */
+img,
+video {
     max-width: 100%;
     height: auto;
-    display: block;
+    border-radius: var(--borderRadius);
+    /* Image border effect from source */
+    border: 1px solid var(--imageBorderColor);
+}
+
+figure {
+    margin: 0 0 var(--space-md) 0;
+}
+
+figcaption {
+    margin-top: 8px;
+    font-size: 0.85em;
+    color: #666;
 }
 
 /* === HR === */
 hr {
     border: none;
-    border-top: 1px solid #e0e0e0;
-    margin: 2rem 0;
+    border-top: 1px solid var(--thinRuleColor);
+    margin: var(--space-lg) 0;
 }
 
-/* === DIALOG === */
-dialog {
-    font-family: 'TildaSans', sans-serif;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    padding: 2rem;
-    max-width: 400px;
+/* === UTILS === */
+mark {
+    background: var(--markedTextBackground);
+    color: inherit;
+    padding: 0 2px;
 }
 
-dialog::backdrop {
-    background: rgba(0, 0, 0, 0.5);
+/* === HEADER & FOOTER === */
+header {
+    margin-bottom: var(--space-lg);
 }
 
-/* === DETAILS === */
-details {
-    border: 1px solid #e0e0e0;
-    border-radius: 4px;
-    padding: 1rem;
-    margin-bottom: 1rem;
-}
-
-summary {
-    font-weight: 500;
-    cursor: pointer;
-    user-select: none;
-}
-
-summary:hover {
-    color: #d00;
-}
-
-/* === ALERTS === */
-.alert {
-    padding: 1rem;
-    margin-bottom: 1.5rem;
-    border-radius: 4px;
-    font-size: 0.9rem;
-}
-
-.alert-success {
-    background: #f0f8f0;
-    color: #2d5;
-    border: 1px solid #c0e0c0;
-}
-
-.alert-error {
-    background: #fff0f0;
-    color: #d00;
-    border: 1px solid #ffc0c0;
-}
-
-.alert-info {
-    background: #f0f8ff;
-    color: #06c;
-    border: 1px solid #c0d8ff;
-}
-
-/* === UTILITIES === */
-.text-center {
-    text-align: center;
-}
-
-.text-left {
-    text-align: left;
-}
-
-.text-right {
-    text-align: right;
-}
-
-.text-muted {
-    color: #999;
-}
-
-.mt-1 {
-    margin-top: 0.5rem;
-}
-
-.mt-2 {
-    margin-top: 1rem;
-}
-
-.mt-3 {
-    margin-top: 1.5rem;
-}
-
-.mt-4 {
-    margin-top: 2rem;
-}
-
-.mb-1 {
-    margin-bottom: 0.5rem;
-}
-
-.mb-2 {
-    margin-bottom: 1rem;
-}
-
-.mb-3 {
-    margin-bottom: 1.5rem;
-}
-
-.mb-4 {
-    margin-bottom: 2rem;
-}
-
-.hidden {
-    display: none;
-}
-
-.block {
-    display: block;
-}
-
-.inline {
-    display: inline;
-}
-
-.inline-block {
-    display: inline-block;
+footer {
+    margin-top: auto;
+    padding-top: var(--space-lg);
+    border-top: 1px solid var(--thinRuleColor);
+    font-size: 0.85em;
+    color: #888;
 }

@@ -10,6 +10,21 @@ class PostController
     {
         $pdo = Database::connect();
 
+        // Check if admin
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
+        $isAdmin = isset($_SESSION['admin_id']);
+
+        // Cache Check (only for non-admins)
+        $cacheKey = 'post_' . $slug;
+        if (!$isAdmin && $cached = \App\Services\Cache::get($cacheKey)) {
+            // Still update views
+            $pdo->prepare("UPDATE posts SET views = views + 1 WHERE slug = ?")->execute([$slug]);
+            echo $cached;
+            return;
+        }
+
         // 1. Отримуємо пост
         $stmt = $pdo->prepare("SELECT * FROM posts WHERE slug = ? AND is_published = 1 LIMIT 1");
         $stmt->execute([$slug]);
@@ -18,15 +33,16 @@ class PostController
         // 404 Not Found
         if (!$post) {
             http_response_code(404);
-            require __DIR__ . '/../../templates/404.php';
+            require __DIR__ . '/../../templates/pages/404.php';
             return;
         }
 
         // 2. Лічильник переглядів (+1)
         $pdo->prepare("UPDATE posts SET views = views + 1 WHERE id = ?")->execute([$post['id']]);
 
+        // ... logic continues ...
+
         // 3. Підготовка контенту (Markdown -> HTML)
-        // Якщо в базі вже є HTML - беремо його, якщо ні - рендеримо на льоту
         if (!empty($post['content_html'])) {
             $post['content'] = $post['content_html'];
         } else {
@@ -38,10 +54,10 @@ class PostController
         $stmt->execute([$post['id']]);
         $comments = $stmt->fetchAll();
 
-        // 5. Теги (Заглушка, щоб уникнути помилки в шаблоні)
+        // 5. Теги
         $tags = [];
 
-        // 6. Глобальні налаштування для Header
+        // 6. Глобальні налаштування
         $blogSettings = [];
         $settingsStmt = $pdo->query("SELECT `key`, `value` FROM settings");
         while ($row = $settingsStmt->fetch()) {
@@ -52,15 +68,16 @@ class PostController
         $blogTitle = $blogSettings['site_title'] ?? 'Logos Blog';
         $pageTitle = $post['title'];
 
-        // Check if admin
-        if (session_status() === PHP_SESSION_NONE) {
-            session_start();
-        }
-        $isAdmin = isset($_SESSION['admin_id']);
-
         // 7. Рендеринг
-        require __DIR__ . '/../../templates/header.php';
-        require __DIR__ . '/../../templates/post.php';
-        require __DIR__ . '/../../templates/footer.php';
+        ob_start();
+        require __DIR__ . '/../../templates/partials/header.php';
+        require __DIR__ . '/../../templates/pages/post.php';
+        require __DIR__ . '/../../templates/partials/footer.php';
+        $html = ob_get_clean();
+
+        if (!$isAdmin) {
+            \App\Services\Cache::set($cacheKey, $html);
+        }
+        echo $html;
     }
 }

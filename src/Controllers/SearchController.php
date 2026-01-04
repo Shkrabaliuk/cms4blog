@@ -47,12 +47,27 @@ class SearchController
 
                 error_log("Search results count: " . count($results));
 
-                // Add basic relevance score and format snippets
+                // Add basic relevance score and format snippets with highlighting
                 foreach ($results as &$result) {
                     $titleMatch = stripos($result['title'], $q) !== false ? 2 : 0;
-                    $contentMatch = stripos($result['snippet'], $q) !== false ? 1 : 0;
-                    $result['relevance'] = $titleMatch + $contentMatch;
-                    $result['snippet'] = htmlspecialchars($result['snippet']) . '...';
+                    // Find position of term in content
+                    $pos = stripos($result['snippet'], $q);
+
+                    // If term not in first 200 chars (which is what snippet currently is), we might need to look deeper
+                    // But for now, let's just highlight what we have if possible. 
+                    // ideally SQL should return full content or we use a better SQL snippet function if available (MySQL doesn't have a great one by default)
+                    // Let's improve the SQL to fetch full content for better snippet generation PHP side for small scale
+                    // Re-fetching content might be expensive, so keeping light.
+
+                    // Highlight logic
+                    $cleanSnippet = strip_tags($result['snippet']);
+                    $safeSnippet = htmlspecialchars($cleanSnippet);
+                    $safeQ = preg_quote(htmlspecialchars($q), '/');
+
+                    $highlighted = preg_replace('/(' . $safeQ . ')/iu', '<mark>$1</mark>', $safeSnippet);
+
+                    $result['relevance'] = $titleMatch + ($pos !== false ? 1 : 0);
+                    $result['snippet'] = $highlighted . '...';
                 }
                 unset($result);
 
@@ -77,8 +92,8 @@ class SearchController
         }
         $isAdmin = isset($_SESSION['admin_id']);
         ob_start();
-        include __DIR__ . '/../../templates/search_results.php';
+        include __DIR__ . '/../../templates/pages/search_results.php';
         $childView = ob_get_clean();
-        require __DIR__ . '/../../templates/layout.php';
+        require __DIR__ . '/../../templates/layouts/layout.php';
     }
 }

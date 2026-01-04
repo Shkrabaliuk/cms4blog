@@ -8,64 +8,9 @@ if (empty($posts)): ?>
     </section>
 <?php else: ?>
 
-    <?php if ($isAdmin): ?>
-        <style>
-            .admin-floating-actions {
-                position: absolute;
-                top: 0;
-                right: 0;
-                height: 100%;
-                pointer-events: none;
-            }
-
-            .btn-edit-sticky {
-                position: sticky;
-                top: 100px;
-                float: right;
-                margin-right: -50px;
-                width: 32px;
-                height: 32px;
-                background: transparent;
-                color: #2e7d32;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                pointer-events: auto;
-                transition: transform 0.2s, color 0.2s;
-                border: none;
-                padding: 0;
-            }
-
-            .btn-edit-sticky:hover {
-                background: transparent;
-                transform: scale(1.1);
-                color: #1b5e20;
-            }
-
-            @media (max-width: 800px) {
-                .admin-floating-actions {
-                    position: absolute;
-                    /* Keep relative to post on mobile timeline to avoid overlap chaos */
-                    top: auto;
-                    bottom: 1rem;
-                    right: 0;
-                    height: auto;
-                    width: 100%;
-                }
-
-                .btn-edit-sticky {
-                    position: absolute;
-                    bottom: 0;
-                    right: 0;
-                    float: none;
-                    margin-right: 0;
-                }
-            }
-        </style>
-    <?php endif; ?>
 
     <?php foreach ($posts as $post): ?>
-        <article style="margin-bottom: 4rem; position: relative;">
+        <article>
             <?php if ($isAdmin): ?>
                 <div class="admin-floating-actions">
                     <a href="/<?= htmlspecialchars($post['slug']) ?>#edit" class="btn-edit-sticky" title="Редагувати">
@@ -86,12 +31,12 @@ if (empty($posts)): ?>
                 </h2>
             </header>
 
-            <div style="margin: 1.5rem 0;">
+            <section>
                 <?= Render::html($post['content']) ?>
-            </div>
+            </section>
 
             <footer>
-                <p style="color: #999; font-size: 0.9rem; margin: 0;">
+                <p class="post-meta">
                     <?= date('d.m.Y', strtotime($post['created_at'])) ?>
 
                     <?php
@@ -138,11 +83,10 @@ if (empty($posts)): ?>
 
     <!-- Pagination -->
     <?php if ($page > 1 || $page < $totalPages): ?>
-        <nav
-            style="display: flex; justify-content: space-between; align-items: center; margin-top: 4rem; padding-top: 2rem; border-top: 1px solid #eee;">
+        <nav class="pagination">
 
             <?php if ($page > 1): ?>
-                <a href="/?page=<?= $page - 1 ?>" style="text-decoration: none;">
+                <a href="/?page=<?= $page - 1 ?>">
                     ← Повернутись
                 </a>
             <?php else: ?>
@@ -150,7 +94,7 @@ if (empty($posts)): ?>
             <?php endif; ?>
 
             <?php if ($page < $totalPages): ?>
-                <a href="/?page=<?= $page + 1 ?>" style="text-decoration: none;">
+                <a href="/?page=<?= $page + 1 ?>">
                     Читати далі →
                 </a>
             <?php else: ?>

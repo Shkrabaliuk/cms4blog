@@ -78,7 +78,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit;
 
     } catch (Exception $e) {
-        $message = "Installation Error: " . $e->getMessage();
+        $message = "Помилка встановлення: " . $e->getMessage();
         $messageType = 'error';
     }
 }
@@ -89,81 +89,154 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Встановлення Logos CMS</title>
+    <title>Встановлення /\ogos</title>
     <link rel="stylesheet" href="/assets/css/base.css">
-    <link rel="stylesheet" href="/assets/css/theme.css">
+    <style>
+        body {
+            max-width: 600px;
+        }
+
+        .install-header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .install-header h1 {
+            margin-top: 0;
+            font-size: 3rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .install-header p {
+            color: #999;
+            font-size: 1.1rem;
+        }
+
+        .section-intro {
+            background: var(--sheetBackgroundColor);
+            padding: 1.5rem;
+            border-radius: var(--borderRadius);
+            margin-bottom: 2rem;
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+
+        .step-group {
+            margin-bottom: 3rem;
+        }
+
+        .step-group h2 {
+            margin-top: 0;
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .step-group > p {
+            color: #666;
+            font-size: 0.9rem;
+            margin-bottom: 1.5rem;
+        }
+
+        label {
+            font-weight: 600;
+        }
+
+        small {
+            display: block;
+            margin-top: 0.3rem;
+            color: #999;
+        }
+
+        .error-message {
+            background: #fff0f0;
+            color: #d00;
+            padding: 1rem;
+            border-radius: var(--borderRadius);
+            border: 1px solid #ffc0c0;
+            margin-bottom: 2rem;
+        }
+    </style>
 </head>
 
 <body>
-    <header>
+    <div class="install-header">
         <h1>/\ogos</h1>
-        <p>Мінімалістична CMS для вашого блогу</p>
-    </header>
+        <p>Мінімалістична CMS</p>
+    </div>
 
-    <main>
-        <div class="settings-container" style="max-width: 600px; margin: 0 auto;">
-            <h2>Встановлення</h2>
+    <div class="section-intro">
+        <p><strong>Вітаємо!</strong> Цей майстер допоможе вам налаштувати блог за кілька хвилин.</p>
+        <p>Вам знадобиться:</p>
+        <ul>
+            <li>MySQL база даних (або MariaDB)</li>
+            <li>Дані для підключення (хост, користувач, пароль)</li>
+            <li>Email та пароль для адміністратора</li>
+        </ul>
+    </div>
 
-            <?php if ($message): ?>
-                <div class="alert alert-error" style="margin-bottom: 2rem;">
-                    <?= htmlspecialchars($message) ?>
-                </div>
-            <?php endif; ?>
-
-            <form method="POST" class="settings-form">
-                <h3>База даних</h3>
-
-                <div class="form-group">
-                    <label for="db_host">Хост</label>
-                    <input type="text" id="db_host" name="db_host" value="localhost" required>
-                    <small>Зазвичай localhost або 127.0.0.1</small>
-                </div>
-
-                <div class="form-group">
-                    <label for="db_name">Назва бази даних</label>
-                    <input type="text" id="db_name" name="db_name" required placeholder="logos_blog">
-                </div>
-
-                <div class="form-group">
-                    <label for="db_user">Користувач</label>
-                    <input type="text" id="db_user" name="db_user" required placeholder="root">
-                </div>
-
-                <div class="form-group">
-                    <label for="db_pass">Пароль</label>
-                    <input type="password" id="db_pass" name="db_pass" placeholder="Залиште порожнім, якщо немає">
-                </div>
-
-                <h3 style="margin-top: 2rem;">Адміністратор</h3>
-
-                <div class="form-group">
-                    <label for="admin_email">Email (для входу)</label>
-                    <input type="email" id="admin_email" name="admin_email" required placeholder="admin@example.com">
-                </div>
-
-                <div class="form-group">
-                    <label for="admin_pass">Пароль</label>
-                    <input type="password" id="admin_pass" name="admin_pass" required minlength="3">
-                    <small>Мінімум 3 символи</small>
-                </div>
-
-                <h3 style="margin-top: 2rem;">Налаштування сайту</h3>
-
-                <div class="form-group">
-                    <label for="site_title">Назва блогу</label>
-                    <input type="text" id="site_title" name="site_title" value="/\ogos" required>
-                </div>
-
-                <div class="form-actions">
-                    <button type="submit" class="btn-submit">Встановити</button>
-                </div>
-            </form>
+    <?php if ($message): ?>
+        <div class="error-message">
+            <?= htmlspecialchars($message) ?>
         </div>
-    </main>
+    <?php endif; ?>
 
-    <footer>
-        <p>© Logos CMS · Мінімалістична платформа для блогів</p>
-    </footer>
+    <form method="POST">
+        <div class="step-group">
+            <h2>1. База даних</h2>
+            <p>Введіть дані для підключення до вашої MySQL бази даних. Якщо база не існує, вона буде створена автоматично.</p>
+
+            <label for="db_host">
+                Хост
+                <input type="text" id="db_host" name="db_host" value="localhost" required>
+                <small>Зазвичай <code>localhost</code> або <code>127.0.0.1</code></small>
+            </label>
+
+            <label for="db_name">
+                Назва бази даних
+                <input type="text" id="db_name" name="db_name" required placeholder="logos_blog">
+                <small>Буде створена, якщо не існує</small>
+            </label>
+
+            <label for="db_user">
+                Користувач
+                <input type="text" id="db_user" name="db_user" required placeholder="root">
+            </label>
+
+            <label for="db_pass">
+                Пароль
+                <input type="password" id="db_pass" name="db_pass" placeholder="Залиште порожнім, якщо немає">
+            </label>
+        </div>
+
+        <div class="step-group">
+            <h2>2. Адміністратор</h2>
+            <p>Створіть обліковий запис адміністратора. Ви зможете використовувати ці дані для входу в панель керування.</p>
+
+            <label for="admin_email">
+                Email
+                <input type="email" id="admin_email" name="admin_email" required placeholder="admin@example.com">
+                <small>Використовується для входу в систему</small>
+            </label>
+
+            <label for="admin_pass">
+                Пароль
+                <input type="password" id="admin_pass" name="admin_pass" required minlength="3">
+                <small>Мінімум 3 символи (краще використовувати складний пароль)</small>
+            </label>
+        </div>
+
+        <div class="step-group">
+            <h2>3. Налаштування сайту</h2>
+            <p>Оберіть назву для вашого блогу. Ви зможете змінити її пізніше в налаштуваннях.</p>
+
+            <label for="site_title">
+                Назва блогу
+                <input type="text" id="site_title" name="site_title" value="/\ogos" required>
+            </label>
+        </div>
+
+        <button type="submit">Встановити</button>
+    </form>
 </body>
 
 </html>

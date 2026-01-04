@@ -21,7 +21,7 @@ class SettingsController
 
     public function index()
     {
-        require __DIR__ . '/../../../templates/admin_settings.php';
+        require __DIR__ . '/../../../templates/pages/admin_settings.php';
     }
 
     public function update()

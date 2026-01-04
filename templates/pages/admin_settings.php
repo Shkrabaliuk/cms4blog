@@ -26,74 +26,18 @@ $isAdmin = true;
 ob_start();
 ?>
 
-<style>
-    .settings-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-        gap: 1.5rem;
-        align-items: start;
-    }
 
-    .settings-card {
-        background: var(--bg-color, #fff);
-        border: 1px solid var(--border-color, #eee);
-        padding: 1.5rem;
-        border-radius: 8px;
-    }
-
-    .settings-card h2 {
-        margin-top: 0;
-        margin-bottom: 1rem;
-        font-size: 1.25rem;
-        border-bottom: 1px solid var(--border-color, #eee);
-        padding-bottom: 0.5rem;
-    }
-
-    .form-group {
-        margin-bottom: 1rem;
-    }
-
-    .form-group label {
-        display: block;
-        margin-bottom: 0.25rem;
-        font-weight: 500;
-        font-size: 0.9rem;
-    }
-
-    .form-group input,
-    .form-group textarea {
-        width: 100%;
-        padding: 0.5rem;
-        font-size: 0.95rem;
-        border: 1px solid #ccc;
-        border-radius: 4px;
-        box-sizing: border-box;
-    }
-
-    .form-group small {
-        display: block;
-        margin-top: 0.25rem;
-        color: #777;
-        font-size: 0.8rem;
-    }
-
-    .btn-submit {
-        width: 100%;
-        margin-top: 1rem;
-    }
-</style>
-
-<div class="settings-container" style="max-width: 1200px;">
-    <h1 style="margin-bottom: 1.5rem;">Налаштування</h1>
+<div class="settings-container settings-wide">
+    <h1>Налаштування</h1>
 
     <?php if ($success): ?>
-        <div class="alert alert-success" style="margin-bottom: 1.5rem;">
+        <div class="alert alert-success">
             <?= htmlspecialchars($success) ?>
         </div>
     <?php endif; ?>
 
     <?php if ($error): ?>
-        <div class="alert alert-error" style="margin-bottom: 1.5rem;">
+        <div class="alert alert-error">
             <?= htmlspecialchars($error) ?>
         </div>
     <?php endif; ?>
@@ -106,7 +50,7 @@ ob_start();
                 <input type="hidden" name="csrf_token" value="<?= Csrf::generate() ?>">
 
                 <!-- General Settings Card -->
-                <div class="settings-card" style="margin-bottom: 1.5rem;">
+                <div class="settings-card">
                     <h2>Загальні</h2>
 
                     <div class="form-group">
@@ -124,11 +68,11 @@ ob_start();
 
                     <div class="form-group">
                         <label for="posts_per_page">Постів на сторінку</label>
-                        <div style="display: flex; gap: 10px;">
+                        <div class="flex-row">
                             <input type="number" id="posts_per_page" name="posts_per_page"
                                 value="<?= (int) ($settings['posts_per_page'] ?? 10) ?>" min="1" max="50" required
                                 style="width: 80px;">
-                            <div style="line-height: 2.2rem; font-size: 0.9rem; color: #777;">постів</div>
+                            <small>постів</small>
                         </div>
                     </div>
                 </div>
@@ -148,30 +92,24 @@ ob_start();
                         <input type="hidden" id="author_avatar" name="author_avatar"
                             value="<?= htmlspecialchars($settings['author_avatar'] ?? '') ?>">
 
-                        <div class="avatar-upload-container"
-                            style="display: flex; align-items: center; gap: 1rem; margin-top: 0.5rem;">
+                        <div class="flex-center">
                             <!-- Preview -->
-                            <div class="avatar-preview"
-                                style="width: 64px; height: 64px; border-radius: 50%; background: #eee; overflow: hidden; display: flex; align-items: center; justify-content: center; border: 1px solid #ddd;">
+                            <div class="avatar-preview">
                                 <?php if (!empty($settings['author_avatar'])): ?>
-                                    <img src="<?= htmlspecialchars($settings['author_avatar']) ?>" id="avatarPreviewImg"
-                                        style="width: 100%; height: 100%; object-fit: cover;">
+                                    <img src="<?= htmlspecialchars($settings['author_avatar']) ?>" id="avatarPreviewImg">
                                 <?php else: ?>
-                                    <img src="" id="avatarPreviewImg"
-                                        style="width: 100%; height: 100%; object-fit: cover; display: none;">
-                                    <span id="avatarPlaceholder" style="font-size: 2rem; color: #ccc;">👤</span>
+                                    <img src="" id="avatarPreviewImg" style="display: none;">
+                                    <span id="avatarPlaceholder" class="avatar-placeholder">👤</span>
                                 <?php endif; ?>
                             </div>
 
                             <!-- Controls -->
                             <div class="avatar-controls">
-                                <input type="file" id="avatarUploadInput" accept="image/*" style="display: none;">
-                                <button type="button" class="btn-secondary" id="btnUploadAvatar"
-                                    style="padding: 0.4rem 0.8rem; font-size: 0.9rem;">
+                                <input type="file" id="avatarUploadInput" accept="image/*" hidden>
+                                <button type="button" class="btn-secondary" id="btnUploadAvatar">
                                     Завантажити фото
                                 </button>
-                                <span id="uploadStatus"
-                                    style="font-size: 0.85rem; margin-left: 0.5rem; color: #666;"></span>
+                                <small id="uploadStatus"></small>
                             </div>
                         </div>
                     </div>
@@ -253,7 +191,7 @@ ob_start();
         <!-- Column 2: Security & System -->
         <div>
             <!-- Password Card -->
-            <div class="settings-card" style="margin-bottom: 1.5rem;">
+            <div class="settings-card">
                 <h2>Безпека</h2>
                 <form method="POST" action="/admin/settings">
                     <input type="hidden" name="csrf_token" value="<?= Csrf::generate() ?>">
@@ -265,7 +203,7 @@ ob_start();
                             autocomplete="current-password">
                     </div>
 
-                    <div class="form-group" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                    <div class="grid-2col">
                         <div>
                             <label for="new_password">Новий пароль</label>
                             <input type="password" id="new_password" name="new_password" required minlength="3"
@@ -286,41 +224,37 @@ ob_start();
             <div class="settings-card">
                 <h2>Система</h2>
 
-                <div
-                    style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; padding-bottom: 1rem; border-bottom: 1px solid #eee;">
+                <div class="backup-item">
                     <div>
                         <strong>Резервна копія</strong>
-                        <div style="font-size: 0.8rem; color: #777;">SQL дамп бази даних</div>
+                        <div><small>SQL дамп бази даних</small></div>
                     </div>
-                    <a href="/admin/backup" class="btn" style="padding: 0.5rem 1rem; font-size: 0.9rem;">Завантажити</a>
+                    <a href="/admin/backup" class="btn">Завантажити</a>
                 </div>
 
-                <div style="margin-bottom: 1rem;">
-                    <div style="margin-bottom: 0.5rem;">
-                        <strong style="color: #d00;">Перевстановлення CMS</strong>
-                        <div style="font-size: 0.8rem; color: #777;">Видаляє config/db.php</div>
+                <div>
+                    <div>
+                        <strong class="error-text">Перевстановлення CMS</strong>
+                        <div><small>Видаляє config/db.php</small></div>
                     </div>
                     <form method="POST" action="/admin/reinstall"
                         onsubmit="return confirm('Ви впевнені? Це видалить конфігурацію БД!');">
                         <input type="hidden" name="csrf_token" value="<?= Csrf::generate() ?>">
-                        <button type="submit" class="btn"
-                            style="width: 100%; background: white; border: 1px solid #d00; color: #d00;">
+                        <button type="submit" class="btn btn-danger">
                             Перевстановити
                         </button>
                     </form>
                 </div>
 
-                <div
-                    style="background: #f9f9f9; padding: 0.75rem; border-radius: 4px; font-size: 0.85rem; color: #555;">
+                <div class="info-box">
                     <div><strong>CMS Version:</strong> 1.0.0</div>
                     <div><strong>PHP:</strong> <?= PHP_VERSION ?></div>
                     <div><strong>Admin:</strong> <?= htmlspecialchars($_SESSION['admin_email'] ?? 'admin') ?></div>
                 </div>
 
                 <!-- Logout Button -->
-                <div style="margin-top: 1.5rem; text-align: center;">
-                    <a href="/api/logout.php" class="btn"
-                        style="display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%;">
+                <div>
+                    <a href="/api/logout.php" class="btn">
                         <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2"
                             fill="none" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
@@ -337,4 +271,4 @@ ob_start();
 
 <?php
 $childView = ob_get_clean();
-require __DIR__ . '/layout.php';
+require __DIR__ . '/../layouts/layout.php';

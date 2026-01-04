@@ -28,7 +28,7 @@ class PostController
         }
 
         $isAdmin = true;
-        require __DIR__ . '/../../../templates/admin_new_post.php';
+        require __DIR__ . '/../../../templates/pages/admin_new_post.php';
     }
 
     public function save()
@@ -48,6 +48,11 @@ class PostController
         $slug = trim($_POST['slug'] ?? '');
         $content = $_POST['content'] ?? '';
         $is_published = isset($_POST['is_published']) ? 1 : 0;
+
+        // Auto-generate slug if empty (Server-side fallback)
+        if (empty($slug) && !empty($title)) {
+            $slug = self::slugify($title);
+        }
 
         // Validation
         if (empty($title) || empty($slug) || empty($content)) {
@@ -119,5 +124,153 @@ class PostController
 
         header('Location: /');
         exit;
+    }
+
+    private static function slugify($text)
+    {
+        // Simple Cyrillic to Latin transliteration
+        $cyr = [
+            'а',
+            'б',
+            'в',
+            'г',
+            'ґ',
+            'д',
+            'е',
+            'є',
+            'ж',
+            'з',
+            'и',
+            'і',
+            'ї',
+            'й',
+            'к',
+            'л',
+            'м',
+            'н',
+            'о',
+            'п',
+            'р',
+            'с',
+            'т',
+            'у',
+            'ф',
+            'х',
+            'ц',
+            'ч',
+            'ш',
+            'щ',
+            'ь',
+            'ю',
+            'я',
+            'А',
+            'Б',
+            'В',
+            'Г',
+            'Ґ',
+            'Д',
+            'Е',
+            'Є',
+            'Ж',
+            'З',
+            'И',
+            'І',
+            'Ї',
+            'Й',
+            'К',
+            'Л',
+            'М',
+            'Н',
+            'О',
+            'П',
+            'Р',
+            'С',
+            'Т',
+            'У',
+            'Ф',
+            'Х',
+            'Ц',
+            'Ч',
+            'Ш',
+            'Щ',
+            'Ь',
+            'Ю',
+            'Я'
+        ];
+        $lat = [
+            'a',
+            'b',
+            'v',
+            'h',
+            'g',
+            'd',
+            'e',
+            'ye',
+            'zh',
+            'z',
+            'y',
+            'i',
+            'yi',
+            'y',
+            'k',
+            'l',
+            'm',
+            'n',
+            'o',
+            'p',
+            'r',
+            's',
+            't',
+            'u',
+            'f',
+            'kh',
+            'ts',
+            'ch',
+            'sh',
+            'shch',
+            '',
+            'yu',
+            'ya',
+            'A',
+            'B',
+            'V',
+            'H',
+            'G',
+            'D',
+            'E',
+            'Ye',
+            'Zh',
+            'Z',
+            'Y',
+            'I',
+            'Yi',
+            'Y',
+            'K',
+            'L',
+            'M',
+            'N',
+            'O',
+            'P',
+            'R',
+            'S',
+            'T',
+            'U',
+            'F',
+            'Kh',
+            'Ts',
+            'Ch',
+            'Sh',
+            'Shch',
+            '',
+            'Yu',
+            'Ya'
+        ];
+
+        $text = str_replace($cyr, $lat, $text);
+        $text = strtolower($text);
+        $text = preg_replace('/[^a-z0-9\s\-]/', '', $text);
+        $text = preg_replace('/\s+/', '-', $text);
+        $text = preg_replace('/-+/', '-', $text);
+        return trim($text, '-');
     }
 }

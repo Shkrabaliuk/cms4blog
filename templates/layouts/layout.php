@@ -1,6 +1,6 @@
-<?php require __DIR__ . '/header.php'; ?>
+<?php require __DIR__ . '/../partials/header.php'; ?>
 
-<?php 
+<?php
 if (is_string($childView) && file_exists(__DIR__ . '/../' . $childView)) {
     // Якщо $childView - шлях до файлу
     include __DIR__ . '/../' . $childView;
@@ -10,4 +10,4 @@ if (is_string($childView) && file_exists(__DIR__ . '/../' . $childView)) {
 }
 ?>
 
-<?php require __DIR__ . '/footer.php'; ?>
+<?php require __DIR__ . '/../partials/footer.php'; ?>
